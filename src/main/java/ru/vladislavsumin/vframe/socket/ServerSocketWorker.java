@@ -19,7 +19,7 @@ import java.util.List;
  *
  * @param <T> connection class
  * @author Sumin Vladislav
- * @version 1.0
+ * @version 1.0.1
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class ServerSocketWorker<T extends ServerConnectionInterface> {
@@ -37,7 +37,7 @@ public class ServerSocketWorker<T extends ServerConnectionInterface> {
     public ServerSocketWorker(Class<T> connection, final ServerSocket socket) {
         this.socket = socket;
 
-        //Initialize constructor.
+        //Initialize constructor
         try {
             constructor = connection.getConstructor(Socket.class, this.getClass());
         } catch (NoSuchMethodException e) {
@@ -45,6 +45,7 @@ public class ServerSocketWorker<T extends ServerConnectionInterface> {
             throw new VFrameRuntimeException(e);
         }
 
+        //Run listen thread
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -69,6 +70,7 @@ public class ServerSocketWorker<T extends ServerConnectionInterface> {
      * Close all connection.
      */
     public void stop() {
+        //Close socket
         try {
             socket.close();
         } catch (IOException e) {
@@ -76,7 +78,7 @@ public class ServerSocketWorker<T extends ServerConnectionInterface> {
             throw new VFrameRuntimeException(e);
         }
 
-        //close all connection.
+        //Close all connection
         synchronized (connections) {
             Iterator<ServerConnectionInterface> iterator = connections.iterator();
             while (iterator.hasNext()) {
