@@ -1,5 +1,5 @@
 group 'VFrame'
-version '0.1b'
+version '0.2b'
 
 apply plugin: 'java'
 
@@ -7,6 +7,19 @@ sourceCompatibility = 1.7
 
 repositories {
     mavenCentral()
+}
+
+task packageSources(type: Jar, dependsOn: 'classes') {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+task buildJarFile(type: Jar) {
+    manifest {
+    }
+    baseName = project.name
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
 }
 
 dependencies {
