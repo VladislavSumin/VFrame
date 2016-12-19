@@ -2,3 +2,5 @@
 /.gradle/
 /logs/
 /build/
+/config/
+/out/

@@ -1,4 +1,4 @@
-package ru.vladislavsumin.vframe.socket;
+package ru.vladislavsumin.vframe.socket.server;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -7,7 +7,6 @@ import ru.vladislavsumin.vframe.VFrameRuntimeException;
 import javax.net.ssl.*;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -18,7 +17,7 @@ import java.security.cert.CertificateException;
  *
  * @author Vladislav Sumin
  * @author Evgeny Rudzyansky
- * @version 1.4
+ * @version 1.6
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class SSLServerSocketFactory {
@@ -70,9 +69,10 @@ public class SSLServerSocketFactory {
      * @return {@link SSLServerSocket}
      * @throws RuntimeException if cannot bind socket.
      */
-    public ServerSocket createServerSocket(int port) throws VFrameRuntimeException {
+    @SuppressWarnings("SameParameterValue")
+    public SSLServerSocket createServerSocket(int port) throws VFrameRuntimeException {
         try {
-            return ssf.createServerSocket(port);
+            return (SSLServerSocket) ssf.createServerSocket(port);
         } catch (IOException e) {
             log.fatal("VFrame: Cannot open port {}");
             throw new VFrameRuntimeException(e);

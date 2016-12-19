@@ -1,4 +1,4 @@
-package ru.vladislavsumin.vframe.socket;
+package ru.vladislavsumin.vframe.socket.client;
 
 
 import org.apache.logging.log4j.LogManager;
@@ -39,7 +39,7 @@ public class ClientSocketWorker {
     private final Runnable run = new Runnable() {
         @Override
         public void run() {
-            while (!work) {
+            while (work) {
                 try {
                     initSSL();
                     out = new ObjectOutputStream(socket.getOutputStream());

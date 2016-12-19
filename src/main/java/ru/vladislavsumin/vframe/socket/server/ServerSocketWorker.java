@@ -1,14 +1,15 @@
-package ru.vladislavsumin.vframe.socket;
+package ru.vladislavsumin.vframe.socket.server;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.vladislavsumin.vframe.VFrameRuntimeException;
 import ru.vladislavsumin.vframe.serializable.Container;
 
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLSocket;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -17,16 +18,14 @@ import java.util.List;
 /**
  * Listen socket and create connection class.
  *
- * @param <T> connection class
  * @author Sumin Vladislav
- * @version 1.1
+ * @version 2.0
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
-public class ServerSocketWorker<T extends ServerConnectionInterface> {
+public class ServerSocketWorker {
     private static final Logger log = LogManager.getLogger();
 
-    private final ServerSocket socket;
-    private final Constructor<T> constructor;
+    private final SSLServerSocket socket;
     private final List<ServerConnectionInterface> connections = new LinkedList<>();
 
     /**
@@ -34,24 +33,29 @@ public class ServerSocketWorker<T extends ServerConnectionInterface> {
      *                   must have constructor with parameters {@link java.net.Socket}, {@link ServerSocketWorker}
      * @param socket     - server socket to listen
      */
-    public ServerSocketWorker(Class<T> connection, final ServerSocket socket) {
+    public ServerSocketWorker(final Class<? extends ServerConnectionInterface> connection,
+                              final SSLServerSocket socket) {
         this.socket = socket;
+
         //Initialize constructor
+        final Constructor<? extends ServerConnectionInterface> constructor;
         try {
-            constructor = connection.getConstructor(Socket.class, this.getClass());
+            constructor = connection.getDeclaredConstructor(Socket.class, ServerSocketWorker.class);
         } catch (NoSuchMethodException e) {
             log.fatal("VFrame: Class {} have not needed constructor", connection.getName());
             throw new VFrameRuntimeException(e);
         }
 
+        final ServerSocketWorker link = this;
+
         //Run listen thread
-        new Thread(new Runnable() {
+        new Thread("ServerSocketWorker port " + socket.getLocalPort()) {
             @Override
             public void run() {
                 log.trace("ServerSocketWorker with port {} init", socket.getLocalPort());
                 while (true) {
                     try {
-                        constructor.newInstance(socket.accept(), this);
+                        constructor.newInstance(socket.accept(), link);
                     } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                         log.fatal("VFrame Internal error", e);
                         throw new VFrameRuntimeException(e);
@@ -61,7 +65,7 @@ public class ServerSocketWorker<T extends ServerConnectionInterface> {
                     }
                 }
             }
-        }, "ServerSocketWorker port " + socket.getLocalPort()).start();
+        }.start();
     }
 
     /**
@@ -91,7 +95,7 @@ public class ServerSocketWorker<T extends ServerConnectionInterface> {
     public void sandToAll(Container container) {
         synchronized (connections) {
             for (ServerConnectionInterface connection : connections) {
-                connection.sand(container);
+                connection.send(container);
             }
         }
     }

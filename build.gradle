@@ -1,5 +1,5 @@
 group 'VFrame'
-version '0.4b'
+version '0.5b'
 
 apply plugin: 'java'
 
