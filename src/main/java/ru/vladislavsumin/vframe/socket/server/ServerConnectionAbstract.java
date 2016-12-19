@@ -28,36 +28,33 @@ public abstract class ServerConnectionAbstract implements ServerConnectionInterf
 
     private boolean connected = true;
 
-    private final Runnable run = new Runnable() {
-        @Override
-        public void run() {
-            while (connected) {
-                try {
-                    ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-                    out = new ObjectOutputStream(socket.getOutputStream());
-                    log.trace("Client {} connected", socket.getInetAddress().getHostAddress());
-                    onConnect();
-                    //noinspection InfiniteLoopStatement
-                    while (true) {
-                        Container container = (Container) in.readObject();
-                        //TODO protocols worker
-                    }
-
-                } catch (ClassNotFoundException e) {
-                    disconnect(e.getMessage());
-                } catch (IOException ignore) {
-                    disconnect(null);
-                }
-            }
-        }
-    };
-
-    public ServerConnectionAbstract(Socket socket, ServerSocketWorker worker) {
+    public ServerConnectionAbstract(final Socket socket, final ServerSocketWorker worker) {
         this.socket = socket;
         this.worker = worker;
 
+        new Thread("Connection with " + socket.getInetAddress().getHostAddress()) {
+            @Override
+            public void run() {
+                while (connected) {
+                    try {
+                        ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+                        out = new ObjectOutputStream(socket.getOutputStream());
+                        log.trace("Client {} connected", socket.getInetAddress().getHostAddress());
+                        onConnect();
+                        //noinspection InfiniteLoopStatement
+                        while (true) {
+                            Container container = (Container) in.readObject();
+                            //TODO protocols worker
+                        }
 
-        new Thread(run, "Connection with " + socket.getInetAddress().getHostAddress()).start();
+                    } catch (ClassNotFoundException e) {
+                        disconnect(e.getMessage());
+                    } catch (IOException ignore) {
+                        disconnect(null);
+                    }
+                }
+            }
+        }.start();
     }
 
     private void onConnect() {
