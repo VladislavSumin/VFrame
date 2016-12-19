@@ -19,7 +19,7 @@ import java.util.List;
  *
  * @param <T> connection class
  * @author Sumin Vladislav
- * @version 1.0.1
+ * @version 1.1
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class ServerSocketWorker<T extends ServerConnectionInterface> {
@@ -36,7 +36,6 @@ public class ServerSocketWorker<T extends ServerConnectionInterface> {
      */
     public ServerSocketWorker(Class<T> connection, final ServerSocket socket) {
         this.socket = socket;
-
         //Initialize constructor
         try {
             constructor = connection.getConstructor(Socket.class, this.getClass());
