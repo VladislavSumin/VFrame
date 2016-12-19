@@ -4,12 +4,10 @@ package ru.vladislavsumin.vframe.socket;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.vladislavsumin.vframe.VFrameRuntimeException;
+import ru.vladislavsumin.vframe.serializable.Container;
 
 import javax.net.ssl.*;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -20,16 +18,45 @@ import java.security.cert.CertificateException;
  * Base client socket worker class
  *
  * @author Sumin Vladislav
- * @version 0.1
+ * @version 1.0
  */
+@SuppressWarnings("unused")
 public class ClientSocketWorker {
     private static final Logger log = LogManager.getLogger();
+
+    private final Object lock = new Object();
 
     private final String ip;
     private final int port;
 
     private SSLSocketFactory ssf;
+    private SSLSocket socket;
+    private ObjectOutputStream out;
 
+    private boolean work = false;
+    private boolean connected = false;
+
+    private final Runnable run = new Runnable() {
+        @Override
+        public void run() {
+            while (!work) {
+                try {
+                    initSSL();
+                    out = new ObjectOutputStream(socket.getOutputStream());
+                    ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+                    connected = true;
+                    while (work) {
+                        Object o = in.readObject();
+                        Container container = (Container) o;
+                        //TODO обработчик принятых сообщений же
+                    }
+                } catch (ClassNotFoundException | IOException ignore) {
+                }
+                disconnect();
+                sleep();
+            }
+        }
+    };
 
     public ClientSocketWorker(String ip, int port, InputStream keystore, String keystorePassword) {
         this.ip = ip;
@@ -37,7 +64,6 @@ public class ClientSocketWorker {
 
         init(keystore, keystorePassword);
     }
-
 
     public ClientSocketWorker(String ip, int port, String path, String keystorePassword) {
         this.ip = ip;
@@ -55,6 +81,62 @@ public class ClientSocketWorker {
 
     private void init(InputStream keystore, String keystorePassword) {
         initKeystore(keystore, keystorePassword);
+    }
+
+    public void start() {
+        synchronized (lock) {
+            if (work) {
+                log.error("VFrame: ClientSocketWorker already worked");
+                return;
+            }
+            work = true;
+            new Thread(run, "Client socket worker thread").start();
+        }
+    }
+
+    public void stop() {
+        synchronized (lock) {
+            if (!work) {
+                log.error("VFrame: ClientSocketWorker already stopped");
+                return;
+            }
+            work = false;
+            disconnect();
+        }
+    }
+
+    public boolean send(Container container) {
+        synchronized (lock) {
+            try {
+                out.reset();
+                out.writeObject(container);
+                out.flush();
+            } catch (Exception ignore) {
+                disconnect();
+                return false;
+            }
+            return true;
+        }
+    }
+
+    private synchronized void disconnect() {
+        synchronized (lock) {
+            if (!connected) return;
+            connected = false;
+            try {
+                socket.close();
+            } catch (Exception ignore) {
+            }
+        }
+    }
+
+    private void initSSL() throws IOException {
+        socket = (SSLSocket) ssf.createSocket(ip, port);
+        socket.setEnabledCipherSuites(new String[]{"TLS_RSA_WITH_AES_128_CBC_SHA"});
+        socket.setEnabledProtocols(new String[]{"TLSv1.2"});
+        socket.setEnableSessionCreation(true);
+        socket.setUseClientMode(true);
+        socket.startHandshake();
     }
 
     private void initKeystore(InputStream keystore, String keystorePassword) {
@@ -76,4 +158,13 @@ public class ClientSocketWorker {
             throw new RuntimeException(e);
         }
     }
+
+    private void sleep(){
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
