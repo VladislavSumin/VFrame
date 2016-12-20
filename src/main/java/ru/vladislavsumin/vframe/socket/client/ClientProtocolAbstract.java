@@ -1,4 +1,4 @@
-package ru.nax2nax.vframe.socket;
+package ru.vladislavsumin.vframe.socket.client;
 
 /**
  * Realize base client protocol methods
@@ -8,6 +8,7 @@ package ru.nax2nax.vframe.socket;
  */
 @SuppressWarnings("WeakerAccess")
 public abstract class ClientProtocolAbstract implements ClientProtocolInterface {
+
     @Override
     public String getName() {
         return getClass().getSimpleName();
