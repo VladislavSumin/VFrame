@@ -39,6 +39,7 @@ public class ClientSocketWorker {
 
     private boolean work = false;
     private boolean connected = false;
+    long lastPing = System.currentTimeMillis();
 
     private final ClientSocketWorker link = this;
     private final Runnable run = new Runnable() {

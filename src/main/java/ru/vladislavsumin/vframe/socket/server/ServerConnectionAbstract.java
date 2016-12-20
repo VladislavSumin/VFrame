@@ -31,6 +31,7 @@ public abstract class ServerConnectionAbstract implements ServerConnectionInterf
     private ObjectOutputStream out;
 
     private boolean connected = true;
+    long lastPing;
 
     static {
         addDefaultProtocol(new Ping());
@@ -43,6 +44,7 @@ public abstract class ServerConnectionAbstract implements ServerConnectionInterf
     public ServerConnectionAbstract(final Socket socket, final ServerSocketWorker worker) {
         this.socket = socket;
         this.worker = worker;
+        lastPing = System.currentTimeMillis();
 
         final ServerConnectionAbstract link = this;
         new Thread("Connection with " + socket.getInetAddress().getHostAddress()) {

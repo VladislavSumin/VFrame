@@ -24,6 +24,7 @@ public class Main {
     public static void main(String[] args) {
         log.trace("Test running");
         ConfigLoader.load(Main.class);
+        VFrame.init();
 
         SSLServerSocketFactory factory = new SSLServerSocketFactory("config/keystore.jks", "", pass);
         new ServerSocketWorker(Test.class, factory.createServerSocket(8889));

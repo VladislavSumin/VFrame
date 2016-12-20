@@ -2,11 +2,11 @@ package ru.vladislavsumin.vframe.socket.server;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import ru.vladislavsumin.vframe.VFrame;
 import ru.vladislavsumin.vframe.VFrameRuntimeException;
 import ru.vladislavsumin.vframe.serializable.Container;
 
 import javax.net.ssl.SSLServerSocket;
-import javax.net.ssl.SSLSocket;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -14,6 +14,7 @@ import java.net.Socket;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TimerTask;
 
 /**
  * Listen socket and create connection class.
@@ -27,6 +28,24 @@ public class ServerSocketWorker {
 
     private final SSLServerSocket socket;
     private final List<ServerConnectionInterface> connections = new LinkedList<>();
+
+    private final TimerTask pingTask = new TimerTask() {
+        @Override
+        public void run() {
+            synchronized (connections) {
+                Iterator<ServerConnectionInterface> iterator = connections.iterator();
+                while (iterator.hasNext()) {
+                    ServerConnectionAbstract connection = (ServerConnectionAbstract) iterator.next();
+                    if (connection.lastPing + 24000 > System.currentTimeMillis()) {
+                        connection.send(Ping.getRequest());
+                    } else {
+                        iterator.remove();
+                        connection.disconnect("timeout");
+                    }
+                }
+            }
+        }
+    };
 
     /**
      * @param connection connection class,
@@ -66,6 +85,8 @@ public class ServerSocketWorker {
                 }
             }
         }.start();
+
+        VFrame.addPeriodicalTimerTask(pingTask, 16000);
     }
 
     /**
@@ -73,6 +94,8 @@ public class ServerSocketWorker {
      * Close all connection.
      */
     public void stop() {
+        pingTask.cancel();
+
         //Close socket
         try {
             socket.close();
