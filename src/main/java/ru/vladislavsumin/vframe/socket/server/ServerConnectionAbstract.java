@@ -10,16 +10,20 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Base abstract class to server connection.
  *
  * @author Sumin Vladislav
- * @version 1.0
+ * @version 1.2
  */
 @SuppressWarnings("unused")
 public abstract class ServerConnectionAbstract implements ServerConnectionInterface {
     private static final Logger log = LogManager.getLogger();
+
+    private static final Map<String, ServerProtocolInterface> defaultProtocols = new HashMap<>();
 
     private final Socket socket;
     private final ServerSocketWorker worker;
@@ -28,10 +32,19 @@ public abstract class ServerConnectionAbstract implements ServerConnectionInterf
 
     private boolean connected = true;
 
+    static {
+        addDefaultProtocol(new Ping());
+    }
+
+    private static void addDefaultProtocol(ServerProtocolInterface protocol) {
+        defaultProtocols.put(protocol.getName(), protocol);
+    }
+
     public ServerConnectionAbstract(final Socket socket, final ServerSocketWorker worker) {
         this.socket = socket;
         this.worker = worker;
 
+        final ServerConnectionAbstract link = this;
         new Thread("Connection with " + socket.getInetAddress().getHostAddress()) {
             @Override
             public void run() {
@@ -44,7 +57,13 @@ public abstract class ServerConnectionAbstract implements ServerConnectionInterf
                         //noinspection InfiniteLoopStatement
                         while (true) {
                             Container container = (Container) in.readObject();
-                            //TODO protocols worker
+                            ServerProtocolInterface protocol = defaultProtocols.get(container.protocol);
+                            //TODO add user protocols
+                            if (protocol == null) {
+                                log.error("VFrame: client used unknown protocol {}", container.protocol);
+                                continue;
+                            }
+                            protocol.exec(container.data, link);
                         }
 
                     } catch (ClassNotFoundException e) {

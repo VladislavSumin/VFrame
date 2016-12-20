@@ -13,12 +13,14 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Base client socket worker class
  *
  * @author Sumin Vladislav
- * @version 1.0
+ * @version 1.2
  */
 @SuppressWarnings("unused")
 public class ClientSocketWorker {
@@ -29,6 +31,8 @@ public class ClientSocketWorker {
     private final String ip;
     private final int port;
 
+    private final Map<String, ClientProtocolInterface> protocols = new HashMap<>();
+
     private SSLSocketFactory ssf;
     private SSLSocket socket;
     private ObjectOutputStream out;
@@ -36,6 +40,7 @@ public class ClientSocketWorker {
     private boolean work = false;
     private boolean connected = false;
 
+    private final ClientSocketWorker link = this;
     private final Runnable run = new Runnable() {
         @Override
         public void run() {
@@ -46,9 +51,13 @@ public class ClientSocketWorker {
                     ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
                     connected = true;
                     while (work) {
-                        Object o = in.readObject();
-                        Container container = (Container) o;
-                        //TODO обработчик принятых сообщений же
+                        Container container = (Container) in.readObject();
+                        ClientProtocolInterface protocol = protocols.get(container.protocol);
+                        if (protocol == null) {
+                            log.error("VFrame: Server used unknown protocol {}", container.protocol);
+                            continue;
+                        }
+                        protocol.exec(container.data, link);
                     }
                 } catch (ClassNotFoundException | IOException ignore) {
                 }
@@ -81,6 +90,7 @@ public class ClientSocketWorker {
 
     private void init(InputStream keystore, String keystorePassword) {
         initKeystore(keystore, keystorePassword);
+        addProtocol(new Ping());
     }
 
     public void start() {
@@ -117,6 +127,10 @@ public class ClientSocketWorker {
             }
             return true;
         }
+    }
+
+    public void addProtocol(ClientProtocolInterface protocol) {
+        protocols.put(protocol.getName(), protocol);
     }
 
     private synchronized void disconnect() {
@@ -159,7 +173,7 @@ public class ClientSocketWorker {
         }
     }
 
-    private void sleep(){
+    private void sleep() {
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {
