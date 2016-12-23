@@ -14,7 +14,7 @@ import java.util.Map;
  * Listen System.in. Receive and process data.
  *
  * @author Sumin Vladislav
- * @version 1.2
+ * @version 1.3
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class ConsoleWorker implements Runnable {
@@ -55,7 +55,7 @@ public class ConsoleWorker implements Runnable {
                 if (data.length == 1)
                     commands.get(data[0]).exec((String) null);
                 else
-                    commands.get(data[0]).exec(data[2]);
+                    commands.get(data[0]).exec(data[1]);
             } else
                 System.out.println("Unknown command");
         } catch (IOException e) {
