@@ -1,5 +1,6 @@
 package ru.vladislavsumin.vframe.console;
 
+import org.apache.commons.cli.CommandLine;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.vladislavsumin.vframe.VFrameRuntimeException;
@@ -7,6 +8,12 @@ import ru.vladislavsumin.vframe.VFrameRuntimeException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+/**
+ * Default command to stop server.
+ *
+ * @author Sumin Vladislav
+ * @version 1.1
+ */
 public class DefaultStopCommand extends CommandAbstract {
     private static final Logger log = LogManager.getLogger();
 
@@ -22,7 +29,7 @@ public class DefaultStopCommand extends CommandAbstract {
     }
 
     @Override
-    public void exec(String param) {
+    public void exec(CommandLine commandLine) {
         try {
             method.invoke(null);
         } catch (IllegalAccessException | InvocationTargetException e) {

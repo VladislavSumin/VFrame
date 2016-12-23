@@ -1,15 +1,48 @@
 package ru.vladislavsumin.vframe.console;
 
+import org.apache.commons.cli.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * Base abstract command realization
  *
  * @author Sumin Vladislav
- * @version 1.1
+ * @version 2.0
  */
 @SuppressWarnings("unused")
 public abstract class CommandAbstract implements CommandInterface {
+    private static final Logger log = LogManager.getLogger();
+
+    private Options options = new Options();
+
     @Override
     public String getName() {
         return getClass().getSimpleName().toLowerCase();
+    }
+
+    @Override
+    public void exec(String param) {
+        if (param == null) exec(((CommandLine) null));
+        else parseParam(param);
+    }
+
+    protected void addOptions(String shortOptions, String longOptions,
+                              int argsCount, boolean required, String descriptions) {
+        boolean hasArgs = argsCount != 0;
+        Option option = new Option(shortOptions, longOptions, hasArgs, descriptions);
+        option.setArgs(argsCount);
+        option.setRequired(required);
+        option.setArgName(longOptions);
+        options.addOption(option);
+    }
+
+    private void parseParam(String param) {
+        try {
+            CommandLine commandLine = new DefaultParser().parse(options, param.split(" "));
+            exec(commandLine);
+        } catch (ParseException e) {
+            log.error("VFrame: Can not parse parameter");
+        }
     }
 }
