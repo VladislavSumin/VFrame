@@ -60,7 +60,7 @@ public abstract class ServerConnectionAbstract implements ServerConnectionInterf
                         while (true) {
                             Container container = (Container) in.readObject();
                             ServerProtocolInterface protocol = defaultProtocols.get(container.protocol);
-                            //TODO add user protocols
+                            if (protocol == null) protocol = getProtocols().get(container.protocol);
                             if (protocol == null) {
                                 log.error("VFrame: client used unknown protocol {}", container.protocol);
                                 continue;
@@ -117,4 +117,9 @@ public abstract class ServerConnectionAbstract implements ServerConnectionInterf
             }
         }
     }
+
+    /**
+     * @return Map with all user protocols.
+     */
+    protected abstract Map<String, ServerProtocolInterface> getProtocols();
 }
