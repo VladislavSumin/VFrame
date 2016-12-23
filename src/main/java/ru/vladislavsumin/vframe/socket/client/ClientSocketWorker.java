@@ -3,6 +3,7 @@ package ru.vladislavsumin.vframe.socket.client;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import ru.vladislavsumin.vframe.VFrame;
 import ru.vladislavsumin.vframe.VFrameRuntimeException;
 import ru.vladislavsumin.vframe.serializable.Container;
 
@@ -15,14 +16,15 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimerTask;
 
 /**
  * Base client socket worker class
  *
  * @author Sumin Vladislav
- * @version 1.2
+ * @version 1.4
  */
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class ClientSocketWorker {
     private static final Logger log = LogManager.getLogger();
 
@@ -68,6 +70,8 @@ public class ClientSocketWorker {
         }
     };
 
+    private TimerTask pingTask;
+
     public ClientSocketWorker(String ip, int port, InputStream keystore, String keystorePassword) {
         this.ip = ip;
         this.port = port;
@@ -102,6 +106,16 @@ public class ClientSocketWorker {
             }
             work = true;
             new Thread(run, "Client socket worker thread").start();
+
+            pingTask = new TimerTask() {
+                @Override
+                public void run() {
+                    if (connected && System.currentTimeMillis() - lastPing > 24000) {
+                        disconnect();
+                    }
+                }
+            };
+            VFrame.addPeriodicalTimerTask(pingTask, 16000);
         }
     }
 
@@ -112,6 +126,8 @@ public class ClientSocketWorker {
                 return;
             }
             work = false;
+            pingTask.cancel();
+            pingTask = null;
             disconnect();
         }
     }

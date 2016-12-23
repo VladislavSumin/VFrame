@@ -22,6 +22,4 @@ public class Ping extends ClientProtocolAbstract {
     public String getName() {
         return "ping";
     }
-
-    //TODO дописать проверку пинга в клиенте.
 }
