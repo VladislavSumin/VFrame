@@ -14,7 +14,7 @@ import java.util.Map;
  * Listen System.in. Receive and process data.
  *
  * @author Sumin Vladislav
- * @version 1.3
+ * @version 1.4
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class ConsoleWorker implements Runnable {
@@ -48,6 +48,7 @@ public class ConsoleWorker implements Runnable {
     public void run() {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         log.trace("ConsoleWorker initialized");
+        //noinspection InfiniteLoopStatement
         while (true) try {
             String[] data = reader.readLine().split(" ", 2);
             if (data[0].equals("")) continue; // Skip empty line

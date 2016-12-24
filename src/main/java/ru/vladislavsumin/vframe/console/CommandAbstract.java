@@ -8,7 +8,7 @@ import org.apache.logging.log4j.Logger;
  * Base abstract command realization
  *
  * @author Sumin Vladislav
- * @version 2.0
+ * @version 2.1
  */
 @SuppressWarnings("unused")
 public abstract class CommandAbstract implements CommandInterface {
@@ -42,7 +42,8 @@ public abstract class CommandAbstract implements CommandInterface {
             CommandLine commandLine = new DefaultParser().parse(options, param.split(" "));
             exec(commandLine);
         } catch (ParseException e) {
-            log.error("VFrame: Can not parse parameter");
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp(getName(), options);
         }
     }
 }

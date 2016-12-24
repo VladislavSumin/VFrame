@@ -26,6 +26,9 @@ public class Main {
         ConfigLoader.load(Main.class);
         VFrame.init();
 
+        ConsoleWorker.addCommand(new testCommand());
+        ConsoleWorker.startListenAsDaemon();
+
         SSLServerSocketFactory factory = new SSLServerSocketFactory("config/keystore.jks", "", pass);
         new ServerSocketWorker(Test.class, factory.createServerSocket(8889));
         new ClientSocketWorker("127.0.0.1", 8889, "config/keystore.jks", "").start();
