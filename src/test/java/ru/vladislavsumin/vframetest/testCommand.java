@@ -8,11 +8,16 @@ import ru.vladislavsumin.vframe.console.CommandAbstract;
  */
 public class testCommand extends CommandAbstract {
     public testCommand() {
-        addOptions("t","test",1,true,"test function");
+        addOptions("t","test",1,false,"test function");
     }
 
     @Override
     public void exec(CommandLine commandLine) {
 
+    }
+
+    @Override
+    public String getName() {
+        return "test";
     }
 }

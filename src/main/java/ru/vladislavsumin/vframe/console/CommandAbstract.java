@@ -8,7 +8,7 @@ import org.apache.logging.log4j.Logger;
  * Base abstract command realization
  *
  * @author Sumin Vladislav
- * @version 2.1
+ * @version 2.2
  */
 @SuppressWarnings("unused")
 public abstract class CommandAbstract implements CommandInterface {
@@ -23,8 +23,13 @@ public abstract class CommandAbstract implements CommandInterface {
 
     @Override
     public void exec(String param) {
-        if (param == null) exec(((CommandLine) null));
-        else parseParam(param);
+        try {
+            CommandLine commandLine = new DefaultParser().parse(options, param.split(" "));
+            exec(commandLine);
+        } catch (ParseException e) {
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp(getName(), options);
+        }
     }
 
     protected void addOptions(String shortOptions, String longOptions,
@@ -35,15 +40,5 @@ public abstract class CommandAbstract implements CommandInterface {
         option.setRequired(required);
         option.setArgName(longOptions);
         options.addOption(option);
-    }
-
-    private void parseParam(String param) {
-        try {
-            CommandLine commandLine = new DefaultParser().parse(options, param.split(" "));
-            exec(commandLine);
-        } catch (ParseException e) {
-            HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp(getName(), options);
-        }
     }
 }
