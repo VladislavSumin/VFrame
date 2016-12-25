@@ -14,15 +14,13 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TimerTask;
+import java.util.*;
 
 /**
  * Base client socket worker class
  *
  * @author Sumin Vladislav
- * @version 1.4
+ * @version 1.5
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class ClientSocketWorker {
@@ -34,6 +32,7 @@ public class ClientSocketWorker {
     private final int port;
 
     private final Map<String, ClientProtocolInterface> protocols = new HashMap<>();
+    private final Set<OnConnectionChangeStateListener> listeners = new HashSet<>();
 
     private SSLSocketFactory ssf;
     private SSLSocket socket;
@@ -42,6 +41,10 @@ public class ClientSocketWorker {
     private boolean work = false;
     private boolean connected = false;
     long lastPing = System.currentTimeMillis();
+
+    public interface OnConnectionChangeStateListener {
+        void onConnectionChangeState(boolean connected);
+    }
 
     private final ClientSocketWorker link = this;
     private final Runnable run = new Runnable() {
@@ -52,7 +55,7 @@ public class ClientSocketWorker {
                     initSSL();
                     out = new ObjectOutputStream(socket.getOutputStream());
                     ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-                    connected = true;
+                    setConnected(true);
                     while (work) {
                         Container container = (Container) in.readObject();
                         ClientProtocolInterface protocol = protocols.get(container.protocol);
@@ -153,7 +156,7 @@ public class ClientSocketWorker {
     private synchronized void disconnect() {
         synchronized (lock) {
             if (!connected) return;
-            connected = false;
+            setConnected(false);
             try {
                 socket.close();
             } catch (Exception ignore) {
@@ -198,4 +201,28 @@ public class ClientSocketWorker {
         }
     }
 
+    private void setConnected(boolean connected) {
+        this.connected = connected;
+        synchronized (listeners) {
+            for (OnConnectionChangeStateListener listener : listeners) {
+                listener.onConnectionChangeState(connected);
+            }
+        }
+    }
+
+    public void addOnConnectionChangeStateListener(OnConnectionChangeStateListener listener) {
+        synchronized (listeners) {
+            listeners.add(listener);
+        }
+    }
+
+    public void removeOnConnectionChangeStateListener(OnConnectionChangeStateListener listener) {
+        synchronized (listeners) {
+            listeners.remove(listener);
+        }
+    }
+
+    public boolean isConnected() {
+        return connected;
+    }
 }
