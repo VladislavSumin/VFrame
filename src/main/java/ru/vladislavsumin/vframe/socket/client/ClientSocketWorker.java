@@ -20,7 +20,7 @@ import java.util.*;
  * Base client socket worker class
  *
  * @author Sumin Vladislav
- * @version 1.5
+ * @version 1.6
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class ClientSocketWorker {
@@ -147,6 +147,15 @@ public class ClientSocketWorker {
             }
             return true;
         }
+    }
+
+    public void sendFromMainThread(final Container container) {
+        new Thread() {
+            @Override
+            public void run() {
+                send(container);
+            }
+        }.start();
     }
 
     public void addProtocol(ClientProtocolInterface protocol) {
