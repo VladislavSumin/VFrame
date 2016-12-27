@@ -7,8 +7,11 @@ import ru.vladislavsumin.vframe.VFrame;
 import ru.vladislavsumin.vframe.VFrameRuntimeException;
 import ru.vladislavsumin.vframe.serializable.Container;
 
+import javax.net.SocketFactory;
 import javax.net.ssl.*;
 import java.io.*;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -20,7 +23,7 @@ import java.util.*;
  * Base client socket worker class
  *
  * @author Sumin Vladislav
- * @version 1.6
+ * @version 2.0
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class ClientSocketWorker {
@@ -28,8 +31,9 @@ public class ClientSocketWorker {
 
     private final Object lock = new Object();
 
-    private final String ip;
-    private final int port;
+    //private final String ip;
+    //private final int port;
+    private final SocketAddress socketAddress;
 
     private final Map<String, ClientProtocolInterface> protocols = new HashMap<>();
     private final Set<OnConnectionChangeStateListener> listeners = new HashSet<>();
@@ -76,15 +80,17 @@ public class ClientSocketWorker {
     private TimerTask pingTask;
 
     public ClientSocketWorker(String ip, int port, InputStream keystore, String keystorePassword) {
-        this.ip = ip;
-        this.port = port;
+        //this.ip = ip;
+        //this.port = port;
+        socketAddress = new InetSocketAddress(ip, port);
 
         init(keystore, keystorePassword);
     }
 
     public ClientSocketWorker(String ip, int port, String path, String keystorePassword) {
-        this.ip = ip;
-        this.port = port;
+        //this.ip = ip;
+        //this.port = port;
+        socketAddress = new InetSocketAddress(ip, port);
 
         InputStream is;
         try {
@@ -174,7 +180,8 @@ public class ClientSocketWorker {
     }
 
     private void initSSL() throws IOException {
-        socket = (SSLSocket) ssf.createSocket(ip, port);
+        socket = (SSLSocket) ssf.createSocket();
+        socket.connect(socketAddress, 5000);
         socket.setEnabledCipherSuites(new String[]{"TLS_RSA_WITH_AES_128_CBC_SHA"});
         socket.setEnabledProtocols(new String[]{"TLSv1.2"});
         socket.setEnableSessionCreation(true);
