@@ -101,6 +101,8 @@ public abstract class ServerConnectionAbstract implements ServerConnectionInterf
             }
             if (reason != null)
                 log.trace("Client {} disconnected, reason: {}", socket.getInetAddress().getAddress(), reason);
+            else
+                log.trace("Client {} disconnected", socket.getInetAddress().getAddress());
         }
     }
 
