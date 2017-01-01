@@ -8,12 +8,12 @@ import java.util.Map;
  * Internal ping protocol
  *
  * @author Sumin Vladislav
- * @version 1.0
+ * @version 1.1
  */
 class Ping extends ServerProtocolAbstract {
 
     @Override
-    public void exec(Map<String, Object> data, ServerConnectionInterface connection) {
+    public void exec(Map<String, Object> data, ServerConnectionAbstract connection) {
         ((ServerConnectionAbstract) connection).lastPing = System.currentTimeMillis();
     }
 

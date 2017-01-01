@@ -17,10 +17,10 @@ import java.util.Map;
  * Base abstract class to server connection.
  *
  * @author Sumin Vladislav
- * @version 1.2
+ * @version 2.0
  */
 @SuppressWarnings("unused")
-public abstract class ServerConnectionAbstract implements ServerConnectionInterface {
+public abstract class ServerConnectionAbstract {
     private static final Logger log = LogManager.getLogger();
 
     private static final Map<String, ServerProtocolInterface> defaultProtocols = new HashMap<>();
@@ -82,12 +82,12 @@ public abstract class ServerConnectionAbstract implements ServerConnectionInterf
         worker.addToClientsList(this);
     }
 
-    @Override
+
     public void disconnect() {
         disconnect(null);
     }
 
-    @Override
+
     public void disconnect(String reason) {
         synchronized (socket) {
             if (!connected) return;
@@ -100,13 +100,12 @@ public abstract class ServerConnectionAbstract implements ServerConnectionInterf
                 throw new VFrameRuntimeException(e);
             }
             if (reason != null)
-                log.trace("Client {} disconnected, reason: {}", socket.getInetAddress().getAddress(), reason);
+                log.trace("Client {} disconnected, reason: {}", socket.getInetAddress().getHostAddress(), reason);
             else
-                log.trace("Client {} disconnected", socket.getInetAddress().getAddress());
+                log.trace("Client {} disconnected", socket.getInetAddress().getHostAddress());
         }
     }
 
-    @Override
     public void send(Container container) {
         synchronized (socket) {
             if (!connected || out == null) return;

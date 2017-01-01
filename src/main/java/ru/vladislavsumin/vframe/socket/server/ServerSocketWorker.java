@@ -20,20 +20,20 @@ import java.util.TimerTask;
  * Listen socket and create connection class.
  *
  * @author Sumin Vladislav
- * @version 2.0
+ * @version 3.0
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class ServerSocketWorker {
     private static final Logger log = LogManager.getLogger();
 
     private final SSLServerSocket socket;
-    private final List<ServerConnectionInterface> connections = new LinkedList<>();
+    private final List<ServerConnectionAbstract> connections = new LinkedList<>();
 
     private final TimerTask pingTask = new TimerTask() {
         @Override
         public void run() {
             synchronized (connections) {
-                Iterator<ServerConnectionInterface> iterator = connections.iterator();
+                Iterator<ServerConnectionAbstract> iterator = connections.iterator();
                 while (iterator.hasNext()) {
                     ServerConnectionAbstract connection = (ServerConnectionAbstract) iterator.next();
                     if (connection.lastPing + 24000 > System.currentTimeMillis()) {
@@ -52,12 +52,12 @@ public class ServerSocketWorker {
      *                   must have constructor with parameters {@link java.net.Socket}, {@link ServerSocketWorker}
      * @param socket     - server socket to listen
      */
-    public ServerSocketWorker(final Class<? extends ServerConnectionInterface> connection,
+    public ServerSocketWorker(final Class<? extends ServerConnectionAbstract> connection,
                               final SSLServerSocket socket) {
         this.socket = socket;
 
         //Initialize constructor
-        final Constructor<? extends ServerConnectionInterface> constructor;
+        final Constructor<? extends ServerConnectionAbstract> constructor;
         try {
             constructor = connection.getDeclaredConstructor(Socket.class, ServerSocketWorker.class);
         } catch (NoSuchMethodException e) {
@@ -106,9 +106,9 @@ public class ServerSocketWorker {
 
         //Close all connection
         synchronized (connections) {
-            Iterator<ServerConnectionInterface> iterator = connections.iterator();
+            Iterator<ServerConnectionAbstract> iterator = connections.iterator();
             while (iterator.hasNext()) {
-                ServerConnectionInterface connection = iterator.next();
+                ServerConnectionAbstract connection = iterator.next();
                 iterator.remove();
                 connection.disconnect("server stop");
             }
@@ -117,19 +117,19 @@ public class ServerSocketWorker {
 
     public void sandToAll(Container container) {
         synchronized (connections) {
-            for (ServerConnectionInterface connection : connections) {
+            for (ServerConnectionAbstract connection : connections) {
                 connection.send(container);
             }
         }
     }
 
-    public void addToClientsList(ServerConnectionInterface connection) {
+    public void addToClientsList(ServerConnectionAbstract connection) {
         synchronized (connections) {
             connections.add(connection);
         }
     }
 
-    public void removeFromClientsList(ServerConnectionInterface connection) {
+    public void removeFromClientsList(ServerConnectionAbstract connection) {
         synchronized (connections) {
             connections.remove(connection);
         }

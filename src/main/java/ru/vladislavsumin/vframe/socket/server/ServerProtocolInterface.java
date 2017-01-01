@@ -6,11 +6,11 @@ import java.util.Map;
  * Interface from server protocol
  *
  * @author Sumin Vladislav
- * @version 1.0
+ * @version 1.1
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public interface ServerProtocolInterface {
     String getName();
 
-    void exec(Map<String, Object> data, ServerConnectionInterface connection);
+    void exec(Map<String, Object> data, ServerConnectionAbstract connection);
 }
