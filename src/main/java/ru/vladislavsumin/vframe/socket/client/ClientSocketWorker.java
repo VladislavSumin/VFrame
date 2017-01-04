@@ -23,7 +23,7 @@ import java.util.*;
  * Base client socket worker class
  *
  * @author Sumin Vladislav
- * @version 2.0
+ * @version 3.1
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class ClientSocketWorker {
@@ -31,11 +31,9 @@ public class ClientSocketWorker {
 
     private final Object lock = new Object();
 
-    //private final String ip;
-    //private final int port;
     private final SocketAddress socketAddress;
 
-    private final Map<String, ClientProtocolInterface> protocols = new HashMap<>();
+    private final Map<String, ClientProtocolAbstract> protocols = new HashMap<>();
     private final Set<OnConnectionChangeStateListener> listeners = new HashSet<>();
 
     private SSLSocketFactory ssf;
@@ -62,7 +60,7 @@ public class ClientSocketWorker {
                     setConnected(true);
                     while (work) {
                         Container container = (Container) in.readObject();
-                        ClientProtocolInterface protocol = protocols.get(container.protocol);
+                        ClientProtocolAbstract protocol = protocols.get(container.protocol);
                         if (protocol == null) {
                             log.error("VFrame: Server used unknown protocol {}", container.protocol);
                             continue;
@@ -164,7 +162,7 @@ public class ClientSocketWorker {
         }.start();
     }
 
-    public void addProtocol(ClientProtocolInterface protocol) {
+    public void addProtocol(ClientProtocolAbstract protocol) {
         protocols.put(protocol.getName(), protocol);
     }
 

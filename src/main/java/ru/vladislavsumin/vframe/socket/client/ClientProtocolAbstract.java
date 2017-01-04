@@ -1,16 +1,19 @@
 package ru.vladislavsumin.vframe.socket.client;
 
+import java.util.Map;
+
 /**
  * Realize base client protocol methods
  *
  * @author Sumin Vladislav
- * @version 1.0
+ * @version 2.0
  */
 @SuppressWarnings("WeakerAccess")
-public abstract class ClientProtocolAbstract implements ClientProtocolInterface {
+public abstract class ClientProtocolAbstract {
 
-    @Override
     public String getName() {
         return getClass().getSimpleName();
     }
+
+    abstract void exec(Map<String, Object> map, ClientSocketWorker worker);
 }
