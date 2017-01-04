@@ -17,9 +17,9 @@ import java.util.Map;
  * Base abstract class to server connection.
  *
  * @author Sumin Vladislav
- * @version 3.0
+ * @version 3.1
  */
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "WeakerAccess"})
 public abstract class ServerConnectionAbstract {
     private static final Logger log = LogManager.getLogger();
 
@@ -55,6 +55,7 @@ public abstract class ServerConnectionAbstract {
                         ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
                         out = new ObjectOutputStream(socket.getOutputStream());
                         log.trace("Client {} connected", socket.getInetAddress().getHostAddress());
+                        worker.addToClientsList(link);
                         onConnect();
                         //noinspection InfiniteLoopStatement
                         while (true) {
@@ -78,8 +79,12 @@ public abstract class ServerConnectionAbstract {
         }.start();
     }
 
-    private void onConnect() {
-        worker.addToClientsList(this);
+    protected void onConnect() {
+
+    }
+
+    protected void onDisconnect() {
+
     }
 
 
@@ -93,6 +98,7 @@ public abstract class ServerConnectionAbstract {
             if (!connected) return;
             connected = false;
             worker.removeFromClientsList(this);
+            onDisconnect();
             try {
                 socket.close();
             } catch (IOException e) {

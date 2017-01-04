@@ -20,7 +20,7 @@ import java.util.TimerTask;
  * Listen socket and create connection class.
  *
  * @author Sumin Vladislav
- * @version 3.0
+ * @version 3.1
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class ServerSocketWorker {
@@ -35,7 +35,7 @@ public class ServerSocketWorker {
             synchronized (connections) {
                 Iterator<ServerConnectionAbstract> iterator = connections.iterator();
                 while (iterator.hasNext()) {
-                    ServerConnectionAbstract connection = (ServerConnectionAbstract) iterator.next();
+                    ServerConnectionAbstract connection = iterator.next();
                     if (connection.lastPing + 24000 > System.currentTimeMillis()) {
                         connection.send(Ping.getRequest());
                     } else {

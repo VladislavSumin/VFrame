@@ -6,7 +6,7 @@ import java.util.Map;
  * Realize base client protocol methods
  *
  * @author Sumin Vladislav
- * @version 2.0
+ * @version 2.1
  */
 @SuppressWarnings("WeakerAccess")
 public abstract class ClientProtocolAbstract {
@@ -15,5 +15,5 @@ public abstract class ClientProtocolAbstract {
         return getClass().getSimpleName();
     }
 
-    abstract void exec(Map<String, Object> map, ClientSocketWorker worker);
+    abstract public void exec(Map<String, Object> map, ClientSocketWorker worker);
 }

@@ -8,8 +8,9 @@ import java.util.Map;
  * Internal ping protocol
  *
  * @author Sumin Vladislav
- * @version 1.1
+ * @version 1.2
  */
+@SuppressWarnings("WeakerAccess")
 class Ping extends ServerProtocolAbstract {
 
     @Override

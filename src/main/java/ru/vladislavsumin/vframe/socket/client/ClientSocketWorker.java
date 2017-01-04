@@ -7,7 +7,6 @@ import ru.vladislavsumin.vframe.VFrame;
 import ru.vladislavsumin.vframe.VFrameRuntimeException;
 import ru.vladislavsumin.vframe.serializable.Container;
 
-import javax.net.SocketFactory;
 import javax.net.ssl.*;
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -23,7 +22,7 @@ import java.util.*;
  * Base client socket worker class
  *
  * @author Sumin Vladislav
- * @version 3.1
+ * @version 3.2
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class ClientSocketWorker {
