@@ -1,7 +1,7 @@
 package ru.vladislavsumin.vframetest;
 
 import ru.vladislavsumin.vframe.socket.server.ServerConnectionAbstract;
-import ru.vladislavsumin.vframe.socket.server.ServerProtocolInterface;
+import ru.vladislavsumin.vframe.socket.server.ServerProtocolAbstract;
 import ru.vladislavsumin.vframe.socket.server.ServerSocketWorker;
 
 import java.net.Socket;
@@ -14,7 +14,7 @@ public class Test extends ServerConnectionAbstract {
     }
 
     @Override
-    protected Map<String, ServerProtocolInterface> getProtocols() {
+    protected Map<String, ServerProtocolAbstract> getProtocols() {
         return new HashMap<>();
     }
 }

@@ -17,13 +17,13 @@ import java.util.Map;
  * Base abstract class to server connection.
  *
  * @author Sumin Vladislav
- * @version 2.0
+ * @version 3.0
  */
 @SuppressWarnings("unused")
 public abstract class ServerConnectionAbstract {
     private static final Logger log = LogManager.getLogger();
 
-    private static final Map<String, ServerProtocolInterface> defaultProtocols = new HashMap<>();
+    private static final Map<String, ServerProtocolAbstract> defaultProtocols = new HashMap<>();
 
     private final Socket socket;
     private final ServerSocketWorker worker;
@@ -37,7 +37,7 @@ public abstract class ServerConnectionAbstract {
         addDefaultProtocol(new Ping());
     }
 
-    private static void addDefaultProtocol(ServerProtocolInterface protocol) {
+    private static void addDefaultProtocol(ServerProtocolAbstract protocol) {
         defaultProtocols.put(protocol.getName(), protocol);
     }
 
@@ -59,7 +59,7 @@ public abstract class ServerConnectionAbstract {
                         //noinspection InfiniteLoopStatement
                         while (true) {
                             Container container = (Container) in.readObject();
-                            ServerProtocolInterface protocol = defaultProtocols.get(container.protocol);
+                            ServerProtocolAbstract protocol = defaultProtocols.get(container.protocol);
                             if (protocol == null) protocol = getProtocols().get(container.protocol);
                             if (protocol == null) {
                                 log.error("VFrame: client used unknown protocol {}", container.protocol);
@@ -122,5 +122,5 @@ public abstract class ServerConnectionAbstract {
     /**
      * @return Map with all user protocols.
      */
-    protected abstract Map<String, ServerProtocolInterface> getProtocols();
+    protected abstract Map<String, ServerProtocolAbstract> getProtocols();
 }
