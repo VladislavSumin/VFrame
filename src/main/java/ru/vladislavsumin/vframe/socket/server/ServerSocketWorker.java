@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import ru.vladislavsumin.vframe.VFrame;
 import ru.vladislavsumin.vframe.VFrameRuntimeException;
 import ru.vladislavsumin.vframe.serializable.Container;
+import ru.vladislavsumin.vframe.socket.VFKeystore;
 
 import javax.net.ssl.SSLServerSocket;
 import java.io.IOException;
@@ -20,7 +21,7 @@ import java.util.TimerTask;
  * Listen socket and create connection class.
  *
  * @author Sumin Vladislav
- * @version 3.1
+ * @version 4.0
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class ServerSocketWorker {
@@ -50,11 +51,15 @@ public class ServerSocketWorker {
     /**
      * @param connection connection class,
      *                   must have constructor with parameters {@link java.net.Socket}, {@link ServerSocketWorker}
-     * @param socket     - server socket to listen
      */
     public ServerSocketWorker(final Class<? extends ServerConnectionAbstract> connection,
-                              final SSLServerSocket socket) {
-        this.socket = socket;
+                              final VFKeystore keystore, int port) {
+        try {
+            this.socket = (SSLServerSocket) keystore.getSSLContext().getServerSocketFactory().createServerSocket(port);
+        } catch (IOException e) {
+            log.fatal("VFrame can not open port {}", port);
+            throw new VFrameRuntimeException(e);
+        }
 
         //Initialize constructor
         final Constructor<? extends ServerConnectionAbstract> constructor;

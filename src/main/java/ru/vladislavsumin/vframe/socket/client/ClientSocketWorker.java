@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import ru.vladislavsumin.vframe.VFrame;
 import ru.vladislavsumin.vframe.VFrameRuntimeException;
 import ru.vladislavsumin.vframe.serializable.Container;
+import ru.vladislavsumin.vframe.socket.VFKeystore;
 
 import javax.net.ssl.*;
 import java.io.*;
@@ -22,7 +23,7 @@ import java.util.*;
  * Base client socket worker class
  *
  * @author Sumin Vladislav
- * @version 3.2
+ * @version 4.0
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class ClientSocketWorker {
@@ -76,34 +77,11 @@ public class ClientSocketWorker {
 
     private TimerTask pingTask;
 
-    public ClientSocketWorker(String ip, int port, InputStream keystore, String keystorePassword) {
-        //this.ip = ip;
-        //this.port = port;
+    public ClientSocketWorker(String ip, int port, VFKeystore keystore) {
         socketAddress = new InetSocketAddress(ip, port);
-
-        init(keystore, keystorePassword);
-    }
-
-    public ClientSocketWorker(String ip, int port, String path, String keystorePassword) {
-        //this.ip = ip;
-        //this.port = port;
-        socketAddress = new InetSocketAddress(ip, port);
-
-        InputStream is;
-        try {
-            is = new FileInputStream(path);
-        } catch (FileNotFoundException e) {
-            log.fatal("VFrame can not open keystore file", e);
-            throw new VFrameRuntimeException(e);
-        }
-        init(is, keystorePassword);
-    }
-
-    private void init(InputStream keystore, String keystorePassword) {
-        initKeystore(keystore, keystorePassword);
+        ssf = keystore.getSSLContext().getSocketFactory();
         addProtocol(new Ping());
     }
-
     public void start() {
         synchronized (lock) {
             if (work) {
@@ -184,26 +162,6 @@ public class ClientSocketWorker {
         socket.setEnableSessionCreation(true);
         socket.setUseClientMode(true);
         socket.startHandshake();
-    }
-
-    private void initKeystore(InputStream keystore, String keystorePassword) {
-        try {
-            String algorithm = KeyManagerFactory.getDefaultAlgorithm();
-
-            KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-            ks.load(keystore, keystorePassword.toCharArray());
-
-            TrustManagerFactory tmf = TrustManagerFactory.getInstance(algorithm);
-            tmf.init(ks);
-
-            SSLContext sc = SSLContext.getInstance("TLS");
-            TrustManager[] trustManagers = tmf.getTrustManagers();
-            sc.init(null, trustManagers, null);
-
-            ssf = sc.getSocketFactory();
-        } catch (IOException | CertificateException | NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private void sleep() {

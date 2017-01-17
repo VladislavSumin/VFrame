@@ -7,12 +7,12 @@ import ru.vladislavsumin.vframe.VFrame;
 import ru.vladislavsumin.vframe.config.ConfigLoader;
 import ru.vladislavsumin.vframe.config.LoadFromConfig;
 import ru.vladislavsumin.vframe.console.ConsoleWorker;
-import ru.vladislavsumin.vframe.console.DefaultStopCommand;
-import ru.vladislavsumin.vframe.serializable.DefaultPermissions;
+import ru.vladislavsumin.vframe.socket.VFKeystore;
 import ru.vladislavsumin.vframe.socket.client.ClientSocketWorker;
-import ru.vladislavsumin.vframe.socket.server.SSLServerSocketFactory;
 import ru.vladislavsumin.vframe.socket.server.ServerSocketWorker;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.Map;
 
 public class Main {
@@ -29,8 +29,13 @@ public class Main {
         ConsoleWorker.addCommand(new testCommand());
         ConsoleWorker.startListenAsDaemon();
 
-        SSLServerSocketFactory factory = new SSLServerSocketFactory("config/keystore.jks", "", pass);
-        new ServerSocketWorker(Test.class, factory.createServerSocket(8889));
+        VFKeystore factory = null;
+        try {
+            factory = new VFKeystore(new FileInputStream("config/keystore.jks"), "", pass);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        new ServerSocketWorker(Test.class, factory, 8888);
         new ClientSocketWorker("127.0.0.1", 8889, "config/keystore.jks", "").start();
     }
 
