@@ -2,6 +2,7 @@ package ru.vladislavsumin.vframe.socket;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import ru.vladislavsumin.vframe.VFrame;
 import ru.vladislavsumin.vframe.VFrameRuntimeException;
 
 import javax.net.ssl.*;
@@ -14,8 +15,9 @@ import java.security.KeyStore;
  * VFrame keystore container
  *
  * @author Sumin Vladislav
- * @version 1.1
+ * @version 1.3
  */
+@SuppressWarnings("unused")
 public class VFKeystore {
     private static final Logger log = LogManager.getLogger();
     private final SSLContext sslContext;
@@ -40,6 +42,8 @@ public class VFKeystore {
             sslContext = SSLContext.getInstance("TLS");
             TrustManager[] trustManagers = tmf.getTrustManagers();
             sslContext.init(keyManagers, trustManagers, null);
+
+            VFrame.print("VFrame: keystore loaded");
 
         } catch (Exception e) {
             log.fatal("VFrame: Can not load keyStore");

@@ -3,6 +3,8 @@ package ru.vladislavsumin.vframe;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -12,7 +14,7 @@ import java.util.TimerTask;
  * Must be init before use another library classes.
  *
  * @author Sumin Vladislav
- * @version 0.4
+ * @version 1.0
  */
 public class VFrame {
     private static final Logger log = LogManager.getLogger();
@@ -33,7 +35,7 @@ public class VFrame {
             }
             init = true;
             timer = new Timer("VFrame main timer");
-            log.trace("VFrame initialized");
+            print("VFrame initialized");
         }
     }
 
@@ -49,8 +51,18 @@ public class VFrame {
             init = false;
             timer.cancel();
             timer = null;
-            log.trace("VFrame stopped");
+            print("VFrame stopped");
         }
+    }
+
+    /**
+     * Printing msg to console with time tag.
+     *
+     * @param msg - msg to print
+     */
+    public static void print(String msg) {
+        SimpleDateFormat format = new SimpleDateFormat("[HH:mm:ss.S] ");
+        System.out.println(format.format(new Date()) + msg);
     }
 
     public static void addPeriodicalTimerTask(TimerTask task, long period) {

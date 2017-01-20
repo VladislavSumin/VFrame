@@ -2,6 +2,7 @@ package ru.vladislavsumin.vframe.console;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import ru.vladislavsumin.vframe.VFrame;
 import ru.vladislavsumin.vframe.VFrameRuntimeException;
 
 import java.io.BufferedReader;
@@ -14,7 +15,7 @@ import java.util.Map;
  * Listen System.in. Receive and process data.
  *
  * @author Sumin Vladislav
- * @version 1.5
+ * @version 1.6
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class ConsoleWorker implements Runnable {
@@ -47,7 +48,7 @@ public class ConsoleWorker implements Runnable {
     @Override
     public void run() {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        log.trace("ConsoleWorker initialized");
+        VFrame.print("VFrame: ConsoleWorker initialized");
         //noinspection InfiniteLoopStatement
         while (true) try {
             String[] data = reader.readLine().split(" ", 2);

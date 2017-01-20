@@ -9,9 +9,6 @@ import ru.vladislavsumin.vframe.socket.VFKeystore;
 
 import javax.net.ssl.SSLServerSocket;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.net.Socket;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,7 +18,7 @@ import java.util.TimerTask;
  * Listen socket and create connection class.
  *
  * @author Sumin Vladislav
- * @version 4.0
+ * @version 4.2
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class ServerSocketWorker {
@@ -48,25 +45,12 @@ public class ServerSocketWorker {
         }
     };
 
-    /**
-     * @param connection connection class,
-     *                   must have constructor with parameters {@link java.net.Socket}, {@link ServerSocketWorker}
-     */
-    public ServerSocketWorker(final Class<? extends ServerConnectionAbstract> connection,
-                              final VFKeystore keystore, int port) {
+
+    public ServerSocketWorker(final ServerConnectionFactory connectionFactory, final VFKeystore keystore, int port) {
         try {
             this.socket = (SSLServerSocket) keystore.getSSLContext().getServerSocketFactory().createServerSocket(port);
         } catch (IOException e) {
             log.fatal("VFrame can not open port {}", port);
-            throw new VFrameRuntimeException(e);
-        }
-
-        //Initialize constructor
-        final Constructor<? extends ServerConnectionAbstract> constructor;
-        try {
-            constructor = connection.getDeclaredConstructor(Socket.class, ServerSocketWorker.class);
-        } catch (NoSuchMethodException e) {
-            log.fatal("VFrame: Class {} have not needed constructor", connection.getName());
             throw new VFrameRuntimeException(e);
         }
 
@@ -76,13 +60,10 @@ public class ServerSocketWorker {
         new Thread("ServerSocketWorker port " + socket.getLocalPort()) {
             @Override
             public void run() {
-                log.trace("ServerSocketWorker with port {} init", socket.getLocalPort());
+                VFrame.print("VFrame: port " + socket.getLocalPort() + " open and listening");
                 while (true) {
                     try {
-                        constructor.newInstance(socket.accept(), link);
-                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                        log.fatal("VFrame Internal error", e);
-                        throw new VFrameRuntimeException(e);
+                        connectionFactory.createNewConnection(socket.accept(), link);
                     } catch (IOException e) {
                         // this run when serverSocket closing.
                         return;
@@ -105,9 +86,10 @@ public class ServerSocketWorker {
         try {
             socket.close();
         } catch (IOException e) {
-            log.fatal("Can not close port", e);
+            log.fatal("VFrame: Can not close port");
             throw new VFrameRuntimeException(e);
         }
+        VFrame.print("Port " + socket.getLocalPort() + " closed");
 
         //Close all connection
         synchronized (connections) {
