@@ -15,7 +15,7 @@ import java.security.KeyStore;
  * VFrame keystore container
  *
  * @author Sumin Vladislav
- * @version 1.3
+ * @version 1.4
  */
 @SuppressWarnings("unused")
 public class VFKeystore {
@@ -59,7 +59,7 @@ public class VFKeystore {
         this(new FileInputStream(path), publicPassword, null);
     }
 
-    public VFKeystore(InputStream path, String publicPassword) throws FileNotFoundException {
+    public VFKeystore(InputStream path, String publicPassword) {
         this(path, publicPassword, null);
     }
 

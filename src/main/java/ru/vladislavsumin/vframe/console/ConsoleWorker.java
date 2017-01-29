@@ -21,14 +21,14 @@ import java.util.Map;
 public class ConsoleWorker implements Runnable {
     private static Logger log = LogManager.getLogger();
 
-    private static final Map<String, CommandInterface> commands = new HashMap<>();
+    private static final Map<String, CommandAbstract> commands = new HashMap<>();
 
     /**
      * Add command to command list.
      *
      * @param command - command
      */
-    public static void addCommand(CommandInterface command) {
+    public static void addCommand(CommandAbstract command) {
         commands.put(command.getName(), command);
     }
 

@@ -8,31 +8,37 @@ import org.apache.logging.log4j.Logger;
  * Base abstract command realization
  *
  * @author Sumin Vladislav
- * @version 2.2
+ * @version 2.3
  */
-@SuppressWarnings("unused")
-public abstract class CommandAbstract implements CommandInterface {
+@SuppressWarnings({"unused", "SameParameterValue"})
+public abstract class CommandAbstract {
     private static final Logger log = LogManager.getLogger();
 
     private Options options = new Options();
 
-    @Override
+
     public String getName() {
         return getClass().getSimpleName().toLowerCase();
     }
 
-    @Override
-    public void exec(String param) {
+
+    public final void exec(String param) {
         try {
             CommandLine commandLine = new DefaultParser().parse(options, param.split(" "));
             exec(commandLine);
         } catch (ParseException e) {
-            HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp(getName(), options);
+            showHelp();
         }
     }
 
-    protected void addOptions(String shortOptions, String longOptions,
+    protected abstract void exec(CommandLine commandLine);
+
+    protected final void showHelp() {
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.printHelp(getName(), options);
+    }
+
+    protected final void addOptions(String shortOptions, String longOptions,
                               int argsCount, boolean required, String descriptions) {
         boolean hasArgs = argsCount != 0;
         Option option = new Option(shortOptions, longOptions, hasArgs, descriptions);
@@ -41,4 +47,5 @@ public abstract class CommandAbstract implements CommandInterface {
         option.setArgName(longOptions);
         options.addOption(option);
     }
+
 }
