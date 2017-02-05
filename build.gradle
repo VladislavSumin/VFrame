@@ -9,19 +9,6 @@ repositories {
     mavenCentral()
 }
 
-task packageSources(type: Jar, dependsOn: 'classes') {
-    from sourceSets.main.allSource
-    classifier = 'sources'
-}
-
-task buildJarFile(type: Jar) {
-    manifest {
-    }
-    baseName = project.name
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
-}
-
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
 
