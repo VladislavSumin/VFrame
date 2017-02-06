@@ -9,9 +9,9 @@ import java.util.Map;
  * @author Sumin Vladislav
  * @version 1.0
  */
-public class Ping extends ClientProtocolAbstract {
+public class Ping extends ProtocolAbstract {
     @Override
-    public void exec(Map<String, Object> map, ClientSocketWorker worker) {
+    public void exec(Map<String, Object> map, SocketWorker worker) {
         worker.lastPing = System.currentTimeMillis();
         Container c = new Container("ping");
         worker.send(c);

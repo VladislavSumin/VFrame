@@ -3,17 +3,18 @@ package ru.falseteam.vframe.socket;
 import java.util.Map;
 
 /**
- * Realize base client protocol methods
+ * Realize base server protocol methods
  *
  * @author Sumin Vladislav
  * @version 2.1
  */
 @SuppressWarnings("WeakerAccess")
-public abstract class ClientProtocolAbstract {
+public abstract class ProtocolAbstract {
 
     public String getName() {
         return getClass().getSimpleName();
     }
 
-    abstract public void exec(Map<String, Object> map, ClientSocketWorker worker);
+    abstract public void exec(Map<String, Object> data, ConnectionAbstract connection);
+
 }
