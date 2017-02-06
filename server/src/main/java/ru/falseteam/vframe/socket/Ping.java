@@ -10,11 +10,11 @@ import java.util.Map;
  * @version 1.2
  */
 @SuppressWarnings("WeakerAccess")
-class Ping extends ServerProtocolAbstract {
+class Ping extends ProtocolAbstract {
 
     @Override
-    public void exec(Map<String, Object> data, ServerConnectionAbstract connection) {
-        ((ServerConnectionAbstract) connection).lastPing = System.currentTimeMillis();
+    public void exec(Map<String, Object> data, ConnectionAbstract connection) {
+        ((ConnectionAbstract) connection).lastPing = System.currentTimeMillis();
     }
 
     @Override

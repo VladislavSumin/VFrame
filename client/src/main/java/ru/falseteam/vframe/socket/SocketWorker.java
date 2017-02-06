@@ -21,14 +21,14 @@ import java.util.*;
  * @version 4.0
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
-public class ClientSocketWorker {
+public class SocketWorker {
     private static final Logger log = LogManager.getLogger();
 
     private final Object lock = new Object();
 
     private final SocketAddress socketAddress;
 
-    private final Map<String, ClientProtocolAbstract> protocols = new HashMap<>();
+    private final Map<String, ProtocolAbstract> protocols = new HashMap<>();
     private final Set<OnConnectionChangeStateListener> listeners = new HashSet<>();
 
     private SSLSocketFactory ssf;
@@ -43,7 +43,7 @@ public class ClientSocketWorker {
         void onConnectionChangeState(boolean connected);
     }
 
-    private final ClientSocketWorker link = this;
+    private final SocketWorker link = this;
     private final Runnable run = new Runnable() {
         @Override
         public void run() {
@@ -55,7 +55,7 @@ public class ClientSocketWorker {
                     setConnected(true);
                     while (work) {
                         Container container = (Container) in.readObject();
-                        ClientProtocolAbstract protocol = protocols.get(container.protocol);
+                        ProtocolAbstract protocol = protocols.get(container.protocol);
                         if (protocol == null) {
                             log.error("VFrame: Server used unknown protocol {}", container.protocol);
                             continue;
@@ -72,7 +72,7 @@ public class ClientSocketWorker {
 
     private TimerTask pingTask;
 
-    public ClientSocketWorker(String ip, int port, VFKeystore keystore) {
+    public SocketWorker(String ip, int port, VFKeystore keystore) {
         socketAddress = new InetSocketAddress(ip, port);
         ssf = keystore.getSSLContext().getSocketFactory();
         addProtocol(new Ping());
@@ -81,7 +81,7 @@ public class ClientSocketWorker {
     public void start() {
         synchronized (lock) {
             if (work) {
-                log.error("VFrame: ClientSocketWorker already worked");
+                log.error("VFrame: SocketWorker already worked");
                 return;
             }
             work = true;
@@ -102,7 +102,7 @@ public class ClientSocketWorker {
     public void stop() {
         synchronized (lock) {
             if (!work) {
-                log.error("VFrame: ClientSocketWorker already stopped");
+                log.error("VFrame: SocketWorker already stopped");
                 return;
             }
             work = false;
@@ -135,7 +135,7 @@ public class ClientSocketWorker {
         }.start();
     }
 
-    public void addProtocol(ClientProtocolAbstract protocol) {
+    public void addProtocol(ProtocolAbstract protocol) {
         protocols.put(protocol.getName(), protocol);
     }
 

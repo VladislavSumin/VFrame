@@ -19,13 +19,13 @@ import java.util.Map;
  * @version 3.1
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
-public abstract class ServerConnectionAbstract {
+public abstract class ConnectionAbstract {
     private static final Logger log = LogManager.getLogger();
 
-    private static final Map<String, ServerProtocolAbstract> defaultProtocols = new HashMap<>();
+    private static final Map<String, ProtocolAbstract> defaultProtocols = new HashMap<>();
 
     private final Socket socket;
-    private final ServerSocketWorker worker;
+    private final SocketWorker worker;
 
     private ObjectOutputStream out;
 
@@ -36,16 +36,16 @@ public abstract class ServerConnectionAbstract {
         addDefaultProtocol(new Ping());
     }
 
-    private static void addDefaultProtocol(ServerProtocolAbstract protocol) {
+    private static void addDefaultProtocol(ProtocolAbstract protocol) {
         defaultProtocols.put(protocol.getName(), protocol);
     }
 
-    public ServerConnectionAbstract(final Socket socket, final ServerSocketWorker worker) {
+    public ConnectionAbstract(final Socket socket, final SocketWorker worker) {
         this.socket = socket;
         this.worker = worker;
         lastPing = System.currentTimeMillis();
 
-        final ServerConnectionAbstract link = this;
+        final ConnectionAbstract link = this;
         new Thread("Connection with " + socket.getInetAddress().getHostAddress()) {
             @Override
             public void run() {
@@ -59,7 +59,7 @@ public abstract class ServerConnectionAbstract {
                         //noinspection InfiniteLoopStatement
                         while (true) {
                             Container container = (Container) in.readObject();
-                            ServerProtocolAbstract protocol = defaultProtocols.get(container.protocol);
+                            ProtocolAbstract protocol = defaultProtocols.get(container.protocol);
                             if (protocol == null) protocol = getProtocols().get(container.protocol);
                             if (protocol == null) {
                                 log.error("VFrame: client used unknown protocol {}", container.protocol);
@@ -127,5 +127,5 @@ public abstract class ServerConnectionAbstract {
     /**
      * @return Map with all user protocols.
      */
-    protected abstract Map<String, ServerProtocolAbstract> getProtocols();
+    protected abstract Map<String, ProtocolAbstract> getProtocols();
 }
