@@ -9,7 +9,7 @@ import java.util.Map;
  * @author Sumin Vladislav
  * @version 1.0
  */
-public class Ping extends ProtocolAbstract {
+public class Ping extends ProtocolAbstract { //TODO почему класс бубличный?
     @Override
     public void exec(Map<String, Object> map, SocketWorker worker) {
         worker.lastPing = System.currentTimeMillis();

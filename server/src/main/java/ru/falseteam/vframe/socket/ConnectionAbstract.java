@@ -4,6 +4,7 @@ package ru.falseteam.vframe.socket;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.falseteam.vframe.VFrameRuntimeException;
+import ru.falseteam.vframe.subscriptions.SubscriptionManager;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -16,7 +17,7 @@ import java.util.Map;
  * Base abstract class to server connection.
  *
  * @author Sumin Vladislav
- * @version 3.1
+ * @version 3.2
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public abstract class ConnectionAbstract {
@@ -97,6 +98,7 @@ public abstract class ConnectionAbstract {
             if (!connected) return;
             connected = false;
             worker.removeFromClientsList(this);
+            SubscriptionManager.removeSubscriber(this);
             onDisconnect();
             try {
                 socket.close();
