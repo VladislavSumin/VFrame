@@ -77,6 +77,7 @@ public class SocketWorker {
         ssf = keystore.getSSLContext().getSocketFactory();
         addProtocol(new Ping());
         addProtocol(new SubscriptionSyncProtocol());
+        addProtocol(new SubscriptionProtocol());
     }
 
     public void start() {
