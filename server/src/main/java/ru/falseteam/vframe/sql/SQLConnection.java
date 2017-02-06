@@ -1,8 +1,9 @@
-package ru.vladislavsumin.myhome.server.sql;
+package ru.falseteam.vframe.sql;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.falseteam.vframe.VFrame;
+import ru.falseteam.vframe.VFrameRuntimeException;
 import ru.falseteam.vframe.config.ConfigLoader;
 import ru.falseteam.vframe.config.LoadFromConfig;
 
@@ -21,11 +22,11 @@ public class SQLConnection {
 
     @LoadFromConfig(filename = "database", defaultValue = "jdbc:mysql://localhost:3306?useSSL=false?autoReconnect=true")
     private static String url;
-    @LoadFromConfig(filename = "database", defaultValue = "MyHome")
+    @LoadFromConfig(filename = "database", defaultValue = "root")
     private static String username;
-    @LoadFromConfig(filename = "database", defaultValue = "password")
+    @LoadFromConfig(filename = "database", defaultValue = "root")
     private static String password;
-    @LoadFromConfig(filename = "database", defaultValue = "MyHome")
+    @LoadFromConfig(filename = "database", defaultValue = "databaseName")
     private static String databaseName;
 
     private static Connection connection;
@@ -42,7 +43,7 @@ public class SQLConnection {
             statement = connection.createStatement();
         } catch (Exception e) {
             log.fatal("Can not connected to database");
-            throw new RuntimeException(e);
+            throw new VFrameRuntimeException(e);
         }
         VFrame.print("Database connected");
     }
@@ -53,18 +54,19 @@ public class SQLConnection {
             connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
+            //TODO вот если тут крашнется тогда обработать.
         }
     }
 
-    static ResultSet executeQuery(String request) throws SQLException {
+    public static ResultSet executeQuery(String request) throws SQLException {
         return statement.executeQuery(request);
     }
 
-    static int executeUpdate(String request) throws SQLException {
+    public static int executeUpdate(String request) throws SQLException {
         return statement.executeUpdate(request);
     }
 
-    static PreparedStatement insert(String table, String... columnNames) {
+    public static PreparedStatement insert(String table, String... columnNames) {
         StringBuilder sb = new StringBuilder();
         sb.append("INSERT INTO `").append(table).append("` (");
         sb.append("`").append(columnNames[0]).append("`");
@@ -92,4 +94,6 @@ public class SQLConnection {
             return false;
         }
     }
+
+    //TODO возможность нескольких соединений, путем создания не статичной копии класса со своими параметрами.
 }
