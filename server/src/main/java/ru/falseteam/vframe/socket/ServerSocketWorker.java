@@ -16,7 +16,7 @@ import java.util.TimerTask;
  * Listen socket and create connection class.
  *
  * @author Sumin Vladislav
- * @version 4.2
+ * @version 4.3
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class ServerSocketWorker {
@@ -118,5 +118,9 @@ public class ServerSocketWorker {
         synchronized (connections) {
             connections.remove(connection);
         }
+    }
+
+    public List<ServerConnectionAbstract> getConnections() {
+        return connections;
     }
 }
