@@ -7,31 +7,60 @@ import ru.falseteam.vframe.socket.SubscriptionProtocol;
 import java.util.HashMap;
 import java.util.Map;
 
-
+/**
+ * @author Sumin Vladislav
+ * @version 1.2
+ */
 public class SubscriptionManager {
-    private static final Map<String, Map<String, Object>> data = new HashMap<>();
+    private static class Pair {
+        int subscriptionCount = 1;
+        Map<String, Object> data = null;
+    }
+
+    private static final Map<String, Pair> data = new HashMap<>();
 
     public static void subscribe(final String eventName, final SocketWorker sw) {
-        runFromUiThread(new Runnable() {
-            @Override
-            public void run() {
-                sw.send(SubscriptionProtocol.subscribe(eventName));
+        synchronized (data) {
+            Pair pair = data.get(eventName);
+            if (pair == null) {
+                data.put(eventName, new Pair());
+                runFromUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        sw.send(SubscriptionProtocol.subscribe(eventName));
+                    }
+                });
+            } else {
+                pair.subscriptionCount++;
             }
-        });
+        }
     }
 
     public static void unsubscribe(final String eventName, final SocketWorker sw) {
-        runFromUiThread(new Runnable() {
-            @Override
-            public void run() {
-                sw.send(SubscriptionProtocol.unsubscribe(eventName));
+        synchronized (data) {
+            Pair pair = data.get(eventName);
+            if (pair.subscriptionCount == 1) {
+                data.remove(eventName);
+
+                runFromUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        sw.send(SubscriptionProtocol.unsubscribe(eventName));
+                    }
+                });
+            } else {
+                pair.subscriptionCount--;
             }
-        });
+        }
+
     }
 
     public static void dataUpdate(String eventName, Map<String, Object> newData) {
         synchronized (data) {
-            data.put(eventName, newData);
+            Pair pair = data.get(eventName);
+            if (pair != null) {
+                pair.data = newData;
+            }
         }
         Redrawer.redraw();
         //TODO сделать полноценные слушатели подписок
@@ -39,7 +68,7 @@ public class SubscriptionManager {
     }
 
     public static Map<String, Object> getData(String eventName) {
-        return data.get(eventName);
+        return data.get(eventName).data;
     }
 
     private static void runFromUiThread(Runnable run) {
