@@ -62,6 +62,7 @@ public abstract class ConnectionAbstract {
                             Container container = (Container) in.readObject();
                             ProtocolAbstract protocol = defaultProtocols.get(container.protocol);
                             if (protocol == null) protocol = getProtocols().get(container.protocol);
+                            if (protocol == null) protocol = getDefaultProtocol();
                             if (protocol == null) {
                                 log.error("VFrame: client used unknown protocol {}", container.protocol);
                                 continue;
@@ -130,4 +131,8 @@ public abstract class ConnectionAbstract {
      * @return Map with all user protocols.
      */
     protected abstract Map<String, ProtocolAbstract> getProtocols();
+
+    protected ProtocolAbstract getDefaultProtocol() {
+        return null;
+    }
 }
