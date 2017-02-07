@@ -17,7 +17,7 @@ import java.util.Map;
  * Base abstract class to server connection.
  *
  * @author Sumin Vladislav
- * @version 3.4
+ * @version 3.5
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public abstract class ConnectionAbstract {
@@ -62,7 +62,7 @@ public abstract class ConnectionAbstract {
                             Container container = (Container) in.readObject();
                             ProtocolAbstract protocol = defaultProtocols.get(container.protocol);
                             if (protocol == null) protocol = getProtocols().get(container.protocol);
-                            if (protocol == null) protocol = getDefaultProtocol(container);
+                            if (protocol == null) protocol = getDefaultProtocol(container.protocol);
                             if (protocol == null) {
                                 log.error("VFrame: client used unknown protocol {}", container.protocol);
                                 continue;
@@ -133,10 +133,10 @@ public abstract class ConnectionAbstract {
 
 
     /**
-     * @param container - container with unknown protocol
+     * @param protocolName - protocol name
      * @return - default protocol or null if protocol is not supported
      */
-    protected ProtocolAbstract getDefaultProtocol(Container container) {
+    protected ProtocolAbstract getDefaultProtocol(String protocolName) {
         return null;
     }
 }
