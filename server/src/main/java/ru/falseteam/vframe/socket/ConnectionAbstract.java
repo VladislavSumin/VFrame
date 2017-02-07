@@ -62,7 +62,7 @@ public abstract class ConnectionAbstract {
                             Container container = (Container) in.readObject();
                             ProtocolAbstract protocol = defaultProtocols.get(container.protocol);
                             if (protocol == null) protocol = getProtocols().get(container.protocol);
-                            if (protocol == null) protocol = getDefaultProtocol(container.protocol);
+                            if (protocol == null) protocol = getDefaultProtocol(container);
                             if (protocol == null) {
                                 log.error("VFrame: client used unknown protocol {}", container.protocol);
                                 continue;
@@ -133,10 +133,10 @@ public abstract class ConnectionAbstract {
 
 
     /**
-     * @param protocolName - protocol name
+     * @param container
      * @return - default protocol or null if protocol is not supported
      */
-    protected ProtocolAbstract getDefaultProtocol(String protocolName) {
+    protected ProtocolAbstract getDefaultProtocol(Container container) {
         return null;
     }
 }
