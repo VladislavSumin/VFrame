@@ -7,9 +7,9 @@ import java.util.Map;
  * Internal ping protocol
  *
  * @author Sumin Vladislav
- * @version 1.0
+ * @version 1.1
  */
-public class Ping extends ProtocolAbstract { //TODO почему класс бубличный?
+class Ping extends ProtocolAbstract {
     @Override
     public void exec(Map<String, Object> map, SocketWorker worker) {
         worker.lastPing = System.currentTimeMillis();
