@@ -17,18 +17,19 @@ import java.util.Map;
  * Base abstract class to server connection.
  *
  * @author Sumin Vladislav
- * @version 3.5
+ * @version 3.6
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
-public abstract class ConnectionAbstract {
+public abstract class ConnectionAbstract<T extends Enum<T>> {
     private static final Logger log = LogManager.getLogger();
 
     private static final Map<String, ProtocolAbstract> defaultProtocols = new HashMap<>();
 
     private final Socket socket;
     private final SocketWorker worker;
-
     private ObjectOutputStream out;
+
+    protected T permission = getPermissionManager().getDefaultPermission();
 
     private boolean connected = true;
     long lastPing;
@@ -61,13 +62,17 @@ public abstract class ConnectionAbstract {
                         while (true) {
                             Container container = (Container) in.readObject();
                             ProtocolAbstract protocol = defaultProtocols.get(container.protocol);
-                            if (protocol == null) protocol = getProtocols().get(container.protocol);
-                            if (protocol == null) protocol = getDefaultProtocol(container);
+                            if (protocol == null) protocol = getPermissionManager()
+                                    .getProtocols(permission).get(container.protocol);
                             if (protocol == null) {
-                                log.error("VFrame: client used unknown protocol {}", container.protocol);
-                                continue;
-                            }
-                            protocol.exec(container.data, link);
+                                PermissionManager.DefaultProtocol defaultProtocol =
+                                        getPermissionManager().getDefaultProtocol();
+                                if (defaultProtocol == null)
+                                    log.error("VFrame: client used unknown protocol {}", container.protocol);
+                                else
+                                    defaultProtocol.exec(container, link);
+                            } else
+                                protocol.exec(container.data, link);
                         }
                     } catch (ClassNotFoundException e) {
                         disconnect(e.getMessage());
@@ -129,14 +134,5 @@ public abstract class ConnectionAbstract {
     /**
      * @return Map with all user protocols.
      */
-    protected abstract Map<String, ProtocolAbstract> getProtocols();
-
-
-    /**
-     * @param container
-     * @return - default protocol or null if protocol is not supported
-     */
-    protected ProtocolAbstract getDefaultProtocol(Container container) {
-        return null;
-    }
+    protected abstract PermissionManager<T> getPermissionManager();
 }
