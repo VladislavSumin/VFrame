@@ -7,8 +7,9 @@ import java.util.Set;
  * Contains redrawable and redraw data
  *
  * @author Sumin Vladislav
- * @version 1.0
+ * @version 1.1
  */
+@SuppressWarnings("unused")
 public class Redrawer {
     private static final Set<Redrawable> redrawables = new HashSet<>();
 

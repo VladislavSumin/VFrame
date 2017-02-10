@@ -15,12 +15,15 @@ import java.sql.*;
  *
  * @author Evgeny Rudzyansky
  * @author Sumin Vladislav
- * @version 1.0
+ * @version 1.1
  */
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class SQLConnection {
     private static final Logger log = LogManager.getLogger();
 
-    @LoadFromConfig(filename = "database", defaultValue = "jdbc:mysql://localhost:3306?useSSL=false?autoReconnect=true")
+    @SuppressWarnings("SpellCheckingInspection")
+    @LoadFromConfig(filename = "database",
+            defaultValue = "jdbc:mysql://localhost:3306?useSSL=false?autoReconnect=true")
     private static String url;
     @LoadFromConfig(filename = "database", defaultValue = "root")
     private static String username;

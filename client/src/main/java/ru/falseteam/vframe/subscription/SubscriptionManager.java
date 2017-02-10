@@ -24,14 +24,6 @@ public class SubscriptionManager {
 
     public static void init(final SocketWorker sw) {
         SubscriptionManager.sw = sw;
-        sw.addOnConnectionChangeStateListener(new SocketWorker.OnConnectionChangeStateListener() {
-            @Override
-            public void onConnectionChangeState(boolean connected) {
-                if (connected) {
-
-                }
-            }
-        });
     }
 
     public static void subscribe(final String eventName) {
