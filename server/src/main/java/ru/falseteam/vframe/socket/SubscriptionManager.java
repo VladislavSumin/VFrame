@@ -1,4 +1,4 @@
-package ru.falseteam.vframe.subscriptions;
+package ru.falseteam.vframe.socket;
 
 import javafx.util.Pair;
 import ru.falseteam.vframe.socket.ConnectionAbstract;
@@ -16,7 +16,11 @@ import java.util.Map;
  * @version 1.1
  */
 public class SubscriptionManager<T extends Enum<T>> {
-    private static final Map<String, Pair<SubscriptionInterface, List<ConnectionAbstract>>> events = new HashMap<>();
+    public interface SubscriptionInterface {
+        Map<String, Object> getAllData();
+    }
+
+    private final Map<String, Pair<SubscriptionInterface, List<ConnectionAbstract>>> events = new HashMap<>();
 
     public void addEvent(String name, SubscriptionInterface allInfoMethod) {
         synchronized (events) {
@@ -67,6 +71,6 @@ public class SubscriptionManager<T extends Enum<T>> {
         container.data.put("data", data);
         return container;
     }
-    
+
     //TODO возможно потом протокол синхронизации, где при повтороной подписке вычисляются изменения, но это потом.
 }

@@ -4,7 +4,6 @@ package ru.falseteam.vframe.socket;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.falseteam.vframe.VFrameRuntimeException;
-import ru.falseteam.vframe.subscriptions.SubscriptionManager;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
