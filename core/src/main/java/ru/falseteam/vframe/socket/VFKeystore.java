@@ -15,9 +15,9 @@ import java.security.KeyStore;
  * VFrame keystore container
  *
  * @author Sumin Vladislav
- * @version 1.4
+ * @version 1.5
  */
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class VFKeystore {
     private static final Logger log = LogManager.getLogger();
     private final SSLContext sslContext;

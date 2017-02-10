@@ -10,12 +10,12 @@ import java.util.TimerTask;
 
 /**
  * Main library class.
- * <p>
  * Must be init before use another library classes.
  *
  * @author Sumin Vladislav
  * @version 1.0
  */
+@SuppressWarnings("unused")
 public class VFrame {
     private static final Logger log = LogManager.getLogger();
 
@@ -73,10 +73,6 @@ public class VFrame {
             }
             timer.schedule(task, 0, period);
         }
-    }
-
-    public static boolean isInitialized() {
-        return init;
     }
 
     private static void initError() {
