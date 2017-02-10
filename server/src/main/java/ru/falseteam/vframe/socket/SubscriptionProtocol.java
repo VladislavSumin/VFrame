@@ -1,8 +1,6 @@
 package ru.falseteam.vframe.socket;
 
 
-import ru.falseteam.vframe.subscriptions.SubscriptionManager;
-
 import java.util.Map;
 
 public class SubscriptionProtocol extends ProtocolAbstract {
