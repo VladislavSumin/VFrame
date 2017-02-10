@@ -13,9 +13,9 @@ import java.util.Map;
  * Subscription manager.
  *
  * @author Sumin Vladislav
- * @version 1.0
+ * @version 1.1
  */
-public class SubscriptionManager {
+public class SubscriptionManager<T extends Enum<T>> {
     private static final Map<String, Pair<SubscriptionInterface, List<ConnectionAbstract>>> events = new HashMap<>();
 
     public static void addEvent(String name, SubscriptionInterface allInfoMethod) {

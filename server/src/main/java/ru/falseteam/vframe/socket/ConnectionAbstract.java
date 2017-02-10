@@ -17,7 +17,7 @@ import java.util.Map;
  * Base abstract class to server connection.
  *
  * @author Sumin Vladislav
- * @version 3.6
+ * @version 3.7
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public abstract class ConnectionAbstract<T extends Enum<T>> {
@@ -26,10 +26,10 @@ public abstract class ConnectionAbstract<T extends Enum<T>> {
     private static final Map<String, ProtocolAbstract> defaultProtocols = new HashMap<>();
 
     private final Socket socket;
-    private final SocketWorker worker;
+    private final SocketWorker<T> worker;
     private ObjectOutputStream out;
 
-    protected T permission = getPermissionManager().getDefaultPermission();
+    protected T permission;
 
     private boolean connected = true;
     long lastPing;
@@ -42,10 +42,11 @@ public abstract class ConnectionAbstract<T extends Enum<T>> {
         defaultProtocols.put(protocol.getName(), protocol);
     }
 
-    public ConnectionAbstract(final Socket socket, final SocketWorker worker) {
+    public ConnectionAbstract(final Socket socket, final SocketWorker<T> worker) {
         this.socket = socket;
         this.worker = worker;
         lastPing = System.currentTimeMillis();
+        permission = worker.getPermissionManager().getDefaultPermission();
 
         final ConnectionAbstract link = this;
         new Thread("Connection with " + socket.getInetAddress().getHostAddress()) {
@@ -62,11 +63,11 @@ public abstract class ConnectionAbstract<T extends Enum<T>> {
                         while (true) {
                             Container container = (Container) in.readObject();
                             ProtocolAbstract protocol = defaultProtocols.get(container.protocol);
-                            if (protocol == null) protocol = getPermissionManager()
+                            if (protocol == null) protocol = worker.getPermissionManager()
                                     .getProtocols(permission).get(container.protocol);
                             if (protocol == null) {
                                 PermissionManager.DefaultProtocol defaultProtocol =
-                                        getPermissionManager().getDefaultProtocol();
+                                        worker.getPermissionManager().getDefaultProtocol();
                                 if (defaultProtocol == null)
                                     log.error("VFrame: client used unknown protocol {}", container.protocol);
                                 else
@@ -130,9 +131,4 @@ public abstract class ConnectionAbstract<T extends Enum<T>> {
             }
         }
     }
-
-    /**
-     * @return Map with all user protocols.
-     */
-    protected abstract PermissionManager<T> getPermissionManager();
 }
