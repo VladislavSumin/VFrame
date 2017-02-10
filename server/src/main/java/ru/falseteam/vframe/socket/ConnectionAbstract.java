@@ -103,7 +103,7 @@ public abstract class ConnectionAbstract<T extends Enum<T>> {
             if (!connected) return;
             connected = false;
             worker.removeFromClientsList(this);
-            SubscriptionManager.removeSubscriber(this);
+            //TODO SubscriptionManager.removeSubscriber(this);
             onDisconnect();
             try {
                 socket.close();

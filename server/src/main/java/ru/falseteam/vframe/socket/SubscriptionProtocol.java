@@ -33,16 +33,18 @@ public class SubscriptionProtocol extends ProtocolAbstract {
         }
 
         if (requestType.equals("subscribe")) {
-            container.data.put("subscription",
-                    SubscriptionManager.addSubscription(eventName, connection));
-            connection.send(container);
+            //TODO
+//            container.data.put("subscription",
+//                    SubscriptionManager.addSubscription(eventName, connection));
+//            connection.send(container);
             return;
         }
 
         if (requestType.equals("unsubscribe")) {
-            container.data.put("subscription",
-                    SubscriptionManager.removeSubscription(eventName, connection));
-            connection.send(container);
+            //TODO
+//            container.data.put("subscription",
+//                    SubscriptionManager.removeSubscription(eventName, connection));
+//            connection.send(container);
             //return;
         }
     }
