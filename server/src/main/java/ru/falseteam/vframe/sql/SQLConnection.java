@@ -66,24 +66,22 @@ public class SQLConnection {
         return statement.executeUpdate(request);
     }
 
-    public static PreparedStatement insert(String table, String... columnNames) {
+    public static PreparedStatement update(String table, String condition, String... columns) throws SQLException {
         StringBuilder sb = new StringBuilder();
-        sb.append("INSERT INTO `").append(table).append("` (");
-        sb.append("`").append(columnNames[0]).append("`");
-        for (int i = 1; i < columnNames.length; i++) {
-            sb.append(",`").append(columnNames[i]).append("`");
-        }
-        sb.append(") VALUES (?");
-        for (int i = 1; i < columnNames.length; i++) {
-            sb.append(",?");
-        }
-        sb.append(");");
+        sb.append("UPDATE `").append(table).append("` SET `").append(columns[0]).append("` = ?");
+        for (int i = 1; i < columns.length; ++i) sb.append(", `").append(columns[i]).append("` = ?");
+        sb.append(' ').append(condition).append(" ;");
+        return connection.prepareStatement(sb.toString());
+    }
 
-        try {
-            return connection.prepareStatement(sb.toString());
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+    public static PreparedStatement insert(String table, String... columns) throws SQLException {
+        StringBuilder sb = new StringBuilder();
+        sb.append("INSERT INTO `").append(table).append("` (").append('`').append(columns[0]).append('`');
+        for (int i = 1; i < columns.length; ++i) sb.append(", `").append(columns[i]).append('`');
+        sb.append(") VALUES ( ?");
+        for (int i = 1; i < columns.length; ++i) sb.append(", ?");
+        sb.append(");");
+        return connection.prepareStatement(sb.toString());
     }
 
     private static boolean createDB(String name) {
