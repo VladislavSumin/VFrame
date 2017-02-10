@@ -18,23 +18,23 @@ import java.util.Map;
 public class SubscriptionManager<T extends Enum<T>> {
     private static final Map<String, Pair<SubscriptionInterface, List<ConnectionAbstract>>> events = new HashMap<>();
 
-    public static void addEvent(String name, SubscriptionInterface allInfoMethod) {
+    public void addEvent(String name, SubscriptionInterface allInfoMethod) {
         synchronized (events) {
             events.put(name, new Pair<>(allInfoMethod, new LinkedList<>()));
         }
     }
 
-    private static Map<String, Object> getAllData(String eventName) {
+    private Map<String, Object> getAllData(String eventName) {
         return events.get(eventName).getKey().getAllData();
     }
 
-    public static void onEventDataChange(String eventName, Map<String, Object> newData) {
+    public void onEventDataChange(String eventName, Map<String, Object> newData) {
         events.get(eventName).getValue().forEach(connection ->
                 connection.send(dataUpdate(eventName, getAllData(eventName))));
         //TODO отправлять только изменения а не все по новой
     }
 
-    public static boolean addSubscription(String eventName, ConnectionAbstract connection) {
+    public boolean addSubscription(String eventName, ConnectionAbstract connection) {
         synchronized (events) {
             if (events.containsKey(eventName)) {
                 events.get(eventName).getValue().add(connection);
@@ -45,7 +45,7 @@ public class SubscriptionManager<T extends Enum<T>> {
         }
     }
 
-    public static boolean removeSubscription(String eventName, ConnectionAbstract connection) {
+    public boolean removeSubscription(String eventName, ConnectionAbstract connection) {
         synchronized (events) {
             if (events.containsKey(eventName)) {
                 events.get(eventName).getValue().remove(connection);
@@ -55,13 +55,13 @@ public class SubscriptionManager<T extends Enum<T>> {
         }
     }
 
-    public static void removeSubscriber(ConnectionAbstract connection) {
+    public void removeSubscriber(ConnectionAbstract connection) {
         synchronized (events) {
             events.forEach((s, pair) -> pair.getValue().remove(connection));
         }
     }
 
-    private static Container dataUpdate(String eventName, Map<String, Object> data) {
+    private Container dataUpdate(String eventName, Map<String, Object> data) {
         Container container = new Container("SubscriptionSyncProtocol", true);
         container.data.put("eventName", eventName);
         container.data.put("data", data);
