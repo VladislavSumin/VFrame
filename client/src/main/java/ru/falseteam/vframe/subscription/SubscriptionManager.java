@@ -12,6 +12,8 @@ import java.util.Map;
  * @version 1.2
  */
 public class SubscriptionManager {
+    private static SocketWorker sw;
+
     private static class Pair {
         int subscriptionCount = 1;
         Map<String, Object> data = null;
@@ -19,7 +21,20 @@ public class SubscriptionManager {
 
     private static final Map<String, Pair> data = new HashMap<>();
 
-    public static void subscribe(final String eventName, final SocketWorker sw) {
+
+    public static void init(final SocketWorker sw) {
+        SubscriptionManager.sw = sw;
+        sw.addOnConnectionChangeStateListener(new SocketWorker.OnConnectionChangeStateListener() {
+            @Override
+            public void onConnectionChangeState(boolean connected) {
+                if (connected) {
+
+                }
+            }
+        });
+    }
+
+    public static void subscribe(final String eventName) {
         synchronized (data) {
             Pair pair = data.get(eventName);
             if (pair == null) {
@@ -36,7 +51,7 @@ public class SubscriptionManager {
         }
     }
 
-    public static void unsubscribe(final String eventName, final SocketWorker sw) {
+    public static void unsubscribe(final String eventName) {
         synchronized (data) {
             Pair pair = data.get(eventName);
             if (pair.subscriptionCount == 1) {
@@ -74,6 +89,14 @@ public class SubscriptionManager {
     private static void runFromUiThread(Runnable run) {
         new Thread(run).start();
         //TODO сб стоит 2 разных метода сделать из UI и обычный.
+    }
+
+    public static void resubscribeAll() {
+        synchronized (data) {
+            for (String key : data.keySet()) {
+                sw.send(SubscriptionProtocol.subscribe(key));
+            }
+        }
     }
 
     //TODO автоподписка после реконнекта. Важно!
