@@ -75,6 +75,16 @@ public class VFrame {
         }
     }
 
+    public static void addPeriodicalTimerTask(TimerTask task, Date firstTime, long period) {
+        synchronized (lock) {
+            if (!init) {
+                initError();
+                return;
+            }
+            timer.schedule(task, firstTime, period);
+        }
+    }
+
     private static void initError() {
         final String error = "VFrame not init";
         log.fatal(error);
