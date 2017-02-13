@@ -7,6 +7,7 @@ import ru.falseteam.vframe.VFrameRuntimeException;
 
 import javax.net.ssl.SSLServerSocket;
 import java.io.IOException;
+import java.net.Socket;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,11 +17,15 @@ import java.util.TimerTask;
  * Listen socket and create connection class.
  *
  * @author Sumin Vladislav
- * @version 4.4
+ * @version 4.5
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class SocketWorker<T extends Enum<T>> {
     private static final Logger log = LogManager.getLogger();
+
+    public interface ConnectionFactory {
+        ConnectionAbstract createNewConnection(Socket socket, SocketWorker parent);
+    }
 
     private final SSLServerSocket socket;
     private final List<ConnectionAbstract> connections = new LinkedList<>();
