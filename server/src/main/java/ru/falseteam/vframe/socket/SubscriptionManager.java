@@ -4,10 +4,8 @@ import javafx.util.Pair;
 import ru.falseteam.vframe.socket.ConnectionAbstract;
 import ru.falseteam.vframe.socket.Container;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.Array;
+import java.util.*;
 
 /**
  * Subscription manager.
@@ -23,11 +21,11 @@ public class SubscriptionManager<T extends Enum<T>> {
     private class Data {
         final SubscriptionInterface subscriptionInterface;
         final List<ConnectionAbstract<T>> subscribers;
-        final T[] permissions;
+        final List<T> permissions;
 
         Data(SubscriptionInterface subscriptionInterface, T[] permissions) {
             this.subscriptionInterface = subscriptionInterface;
-            this.permissions = permissions;
+            this.permissions = Arrays.asList(permissions);
             subscribers = new LinkedList<>();
         }
     }
@@ -55,9 +53,12 @@ public class SubscriptionManager<T extends Enum<T>> {
     public boolean addSubscription(String eventName, ConnectionAbstract<T> connection) {
         synchronized (events) {
             if (events.containsKey(eventName)) {
-                events.get(eventName).subscribers.add(connection);
-                connection.send(dataUpdate(eventName, getAllData(eventName)));
-                return true;
+                Data data = events.get(eventName);
+                if (data.permissions.contains(connection.permission)) {
+                    data.subscribers.add(connection);
+                    connection.send(dataUpdate(eventName, getAllData(eventName)));
+                    return true;
+                }
             }
             return false;
         }
