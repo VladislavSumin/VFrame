@@ -11,7 +11,7 @@ import java.util.*;
  * Subscription manager.
  *
  * @author Sumin Vladislav
- * @version 2.0
+ * @version 2.5
  */
 public class SubscriptionManager<T extends Enum<T>> {
     public interface SubscriptionInterface {
@@ -50,7 +50,7 @@ public class SubscriptionManager<T extends Enum<T>> {
         }
     }
 
-    public boolean addSubscription(String eventName, ConnectionAbstract<T> connection) {
+    boolean addSubscription(String eventName, ConnectionAbstract<T> connection) {
         synchronized (events) {
             if (events.containsKey(eventName)) {
                 Data data = events.get(eventName);
@@ -64,7 +64,7 @@ public class SubscriptionManager<T extends Enum<T>> {
         }
     }
 
-    public boolean removeSubscription(String eventName, ConnectionAbstract<T> connection) {
+    boolean removeSubscription(String eventName, ConnectionAbstract<T> connection) {
         synchronized (events) {
             if (events.containsKey(eventName)) {
                 events.get(eventName).subscribers.remove(connection);

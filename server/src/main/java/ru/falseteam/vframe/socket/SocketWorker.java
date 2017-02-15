@@ -17,7 +17,7 @@ import java.util.TimerTask;
  * Listen socket and create connection class.
  *
  * @author Sumin Vladislav
- * @version 4.5
+ * @version 4.6
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class SocketWorker<T extends Enum<T>> {
@@ -30,6 +30,7 @@ public class SocketWorker<T extends Enum<T>> {
     private final SSLServerSocket socket;
     private final List<ConnectionAbstract> connections = new LinkedList<>();
     private final PermissionManager<T> permissionManager;
+    private final SubscriptionManager<T> subscriptionManager;
 
     private final TimerTask pingTask = new TimerTask() {
         @Override
@@ -56,7 +57,9 @@ public class SocketWorker<T extends Enum<T>> {
             int port,
             PermissionManager<T> permissionManager,
             SubscriptionManager<T> subscriptionManager) {
+
         this.permissionManager = permissionManager;
+        this.subscriptionManager = subscriptionManager;
         try {
             this.socket = (SSLServerSocket) keystore.getSSLContext().getServerSocketFactory().createServerSocket(port);
         } catch (IOException e) {
@@ -138,5 +141,9 @@ public class SocketWorker<T extends Enum<T>> {
 
     public PermissionManager<T> getPermissionManager() {
         return permissionManager;
+    }
+
+    public SubscriptionManager<T> getSubscriptionManager() {
+        return subscriptionManager;
     }
 }

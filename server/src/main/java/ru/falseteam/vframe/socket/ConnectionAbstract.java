@@ -35,6 +35,7 @@ public abstract class ConnectionAbstract<T extends Enum<T>> {
 
     static {
         addDefaultProtocol(new Ping());
+        addDefaultProtocol(new SubscriptionProtocol());
     }
 
     private static void addDefaultProtocol(ProtocolAbstract protocol) {
@@ -129,5 +130,9 @@ public abstract class ConnectionAbstract<T extends Enum<T>> {
                 disconnect(null);
             }
         }
+    }
+
+    public SocketWorker<T> getWorker() {
+        return worker;
     }
 }
