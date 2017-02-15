@@ -18,10 +18,10 @@ import java.util.*;
  * Base client socket worker class
  *
  * @author Sumin Vladislav
- * @version 4.0
+ * @version 4.1
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
-public class SocketWorker {
+public class SocketWorker<T extends Enum<T>> {
     private static final Logger log = LogManager.getLogger();
 
     private final Object lock = new Object();
@@ -30,6 +30,8 @@ public class SocketWorker {
 
     private final Map<String, ProtocolAbstract> protocols = new HashMap<>();
     private final Set<OnConnectionChangeStateListener> listeners = new HashSet<>();
+
+    private final SubscriptionManager subscriptionManager;
 
     private SSLSocketFactory ssf;
     private SSLSocket socket;
@@ -72,7 +74,12 @@ public class SocketWorker {
 
     private TimerTask pingTask;
 
-    public SocketWorker(String ip, int port, VFKeystore keystore) {
+    public SocketWorker(String ip, int port, VFKeystore keystore,
+                        Class<T> permissionEnum, T disconnectedPermission, T defaultPermission,
+                        SubscriptionManager subscriptionManager) {
+        //TODO permission.
+        this.subscriptionManager = subscriptionManager;
+        subscriptionManager.init(this);
         socketAddress = new InetSocketAddress(ip, port);
         ssf = keystore.getSSLContext().getSocketFactory();
         addProtocol(new Ping());
@@ -172,6 +179,9 @@ public class SocketWorker {
 
     private void setConnected(boolean connected) {
         this.connected = connected;
+        if (connected) {
+            subscriptionManager.resubscribeAll();
+        }
         synchronized (listeners) {
             for (OnConnectionChangeStateListener listener : listeners) {
                 listener.onConnectionChangeState(connected);
@@ -193,5 +203,9 @@ public class SocketWorker {
 
     public boolean isConnected() {
         return connected;
+    }
+
+    public SubscriptionManager getSubscriptionManager() {
+        return subscriptionManager;
     }
 }

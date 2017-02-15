@@ -17,7 +17,7 @@ import java.util.TimerTask;
  * Listen socket and create connection class.
  *
  * @author Sumin Vladislav
- * @version 4.5
+ * @version 4.7
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class SocketWorker<T extends Enum<T>> {
@@ -30,6 +30,8 @@ public class SocketWorker<T extends Enum<T>> {
     private final SSLServerSocket socket;
     private final List<ConnectionAbstract> connections = new LinkedList<>();
     private final PermissionManager<T> permissionManager;
+    private final SubscriptionManager<T> subscriptionManager;
+    private final ConnectionFactory connectionFactory;
 
     private final TimerTask pingTask = new TimerTask() {
         @Override
@@ -56,16 +58,21 @@ public class SocketWorker<T extends Enum<T>> {
             int port,
             PermissionManager<T> permissionManager,
             SubscriptionManager<T> subscriptionManager) {
+
         this.permissionManager = permissionManager;
+        this.subscriptionManager = subscriptionManager;
+        this.connectionFactory = connectionFactory;
         try {
             this.socket = (SSLServerSocket) keystore.getSSLContext().getServerSocketFactory().createServerSocket(port);
         } catch (IOException e) {
             log.fatal("VFrame can not open port {}", port);
             throw new VFrameRuntimeException(e);
         }
+    }
 
+    public void start() {
+        //TODO запретить старт стоп старт послеждовательность
         final SocketWorker link = this;
-
         //Run listen thread
         new Thread("SocketWorker port " + socket.getLocalPort()) {
             @Override
@@ -81,7 +88,6 @@ public class SocketWorker<T extends Enum<T>> {
                 }
             }
         }.start();
-
         VFrame.addPeriodicalTimerTask(pingTask, 16000);
     }
 
@@ -138,5 +144,9 @@ public class SocketWorker<T extends Enum<T>> {
 
     public PermissionManager<T> getPermissionManager() {
         return permissionManager;
+    }
+
+    public SubscriptionManager<T> getSubscriptionManager() {
+        return subscriptionManager;
     }
 }

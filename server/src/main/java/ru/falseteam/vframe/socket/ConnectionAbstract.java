@@ -28,13 +28,14 @@ public abstract class ConnectionAbstract<T extends Enum<T>> {
     private final SocketWorker<T> worker;
     private ObjectOutputStream out;
 
-    protected T permission;
+    private T permission;
 
     private boolean connected = true;
     long lastPing;
 
     static {
         addDefaultProtocol(new Ping());
+        addDefaultProtocol(new SubscriptionProtocol());
     }
 
     private static void addDefaultProtocol(ProtocolAbstract protocol) {
@@ -129,5 +130,18 @@ public abstract class ConnectionAbstract<T extends Enum<T>> {
                 disconnect(null);
             }
         }
+    }
+
+    public SocketWorker<T> getWorker() {
+        return worker;
+    }
+
+    public T getPermission() {
+        return permission;
+    }
+
+    public void setPermission(T permission) {
+        //TODO send sync to client;
+        this.permission = permission;
     }
 }

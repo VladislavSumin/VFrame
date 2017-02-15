@@ -9,8 +9,8 @@ import ru.falseteam.vframe.socket.Container;
 public class SubscriptionProtocol extends ProtocolAbstract {
     @Override
     public void exec(Map<String, Object> map, SocketWorker worker) {
-        //TODO this
-        //TODO Удаление инфы после отписки от нее.
+        worker.getSubscriptionManager()
+                .setFailed(map.get("eventName").toString(), (boolean) map.get("subscription"));
     }
 
     public static Container subscribe(String eventName) {
