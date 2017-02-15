@@ -93,11 +93,9 @@ public abstract class ConnectionAbstract<T extends Enum<T>> {
 
     }
 
-
     public void disconnect() {
         disconnect(null);
     }
-
 
     public void disconnect(String reason) {
         synchronized (socket) {

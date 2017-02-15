@@ -11,9 +11,12 @@ import java.util.*;
  * Subscription manager.
  *
  * @author Sumin Vladislav
- * @version 2.5
+ * @version 2.6
  */
 public class SubscriptionManager<T extends Enum<T>> {
+    SubscriptionManager() {
+    }
+
     public interface SubscriptionInterface {
         Map<String, Object> getAllData();
     }

@@ -17,7 +17,7 @@ import java.util.TimerTask;
  * Listen socket and create connection class.
  *
  * @author Sumin Vladislav
- * @version 4.7
+ * @version 4.8
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class SocketWorker<T extends Enum<T>> {
@@ -56,11 +56,10 @@ public class SocketWorker<T extends Enum<T>> {
             final ConnectionFactory connectionFactory,
             final VFKeystore keystore,
             int port,
-            PermissionManager<T> permissionManager,
-            SubscriptionManager<T> subscriptionManager) {
+            PermissionManager<T> permissionManager) {
 
         this.permissionManager = permissionManager;
-        this.subscriptionManager = subscriptionManager;
+        this.subscriptionManager = new SubscriptionManager<>();
         this.connectionFactory = connectionFactory;
         try {
             this.socket = (SSLServerSocket) keystore.getSSLContext().getServerSocketFactory().createServerSocket(port);
