@@ -54,7 +54,7 @@ public class SubscriptionManager<T extends Enum<T>> {
         synchronized (events) {
             if (events.containsKey(eventName)) {
                 Data data = events.get(eventName);
-                if (data.permissions.contains(connection.permission)) {
+                if (data.permissions.contains(connection.getPermission())) {
                     data.subscribers.add(connection);
                     connection.send(dataUpdate(eventName, getAllData(eventName)));
                     return true;

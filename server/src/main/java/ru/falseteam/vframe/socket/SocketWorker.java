@@ -71,6 +71,7 @@ public class SocketWorker<T extends Enum<T>> {
     }
 
     public void start() {
+        //TODO запретить старт стоп старт послеждовательность
         final SocketWorker link = this;
         //Run listen thread
         new Thread("SocketWorker port " + socket.getLocalPort()) {
