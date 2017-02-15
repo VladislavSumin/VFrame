@@ -10,7 +10,7 @@ public class SubscriptionProtocol extends ProtocolAbstract {
     @Override
     public void exec(Map<String, Object> map, SocketWorker worker) {
         worker.getSubscriptionManager()
-                .setFailed(map.get("eventName").toString(), (boolean) map.get("subscribe"));
+                .setFailed(map.get("eventName").toString(), (boolean) map.get("subscription"));
     }
 
     public static Container subscribe(String eventName) {
