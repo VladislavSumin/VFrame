@@ -142,5 +142,6 @@ public abstract class ConnectionAbstract<T extends Enum<T>> {
         this.permission = permission;
         Container c = new Container("SyncPermissionProtocol", true);
         c.data.put("permission", permission);
+        send(c);
     }
 }
