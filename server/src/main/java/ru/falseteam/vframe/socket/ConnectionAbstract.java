@@ -16,7 +16,7 @@ import java.util.Map;
  * Base abstract class to server connection.
  *
  * @author Sumin Vladislav
- * @version 3.7
+ * @version 3.8
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public abstract class ConnectionAbstract<T extends Enum<T>> {
@@ -35,7 +35,7 @@ public abstract class ConnectionAbstract<T extends Enum<T>> {
 
     static {
         addDefaultProtocol(new Ping());
-        addDefaultProtocol(new SubscriptionProtocol());
+        addDefaultProtocol(new SubscriptionManager.SubscriptionProtocol());
     }
 
     private static void addDefaultProtocol(ProtocolAbstract protocol) {
@@ -93,11 +93,9 @@ public abstract class ConnectionAbstract<T extends Enum<T>> {
 
     }
 
-
     public void disconnect() {
         disconnect(null);
     }
-
 
     public void disconnect(String reason) {
         synchronized (socket) {
