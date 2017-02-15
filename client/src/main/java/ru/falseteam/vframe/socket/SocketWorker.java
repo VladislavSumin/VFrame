@@ -188,10 +188,10 @@ public class SocketWorker<T extends Enum<T>> {
     private void setConnected(boolean connected) {
         this.connected = connected;
         if (connected) {
-            currentPermission = defaultPermission;
+            setCurrentPermission(defaultPermission);
             subscriptionManager.resubscribeAll();
         } else {
-            currentPermission = disconnectedPermission;
+            setCurrentPermission(disconnectedPermission);
         }
     }
 
@@ -216,7 +216,11 @@ public class SocketWorker<T extends Enum<T>> {
     }
 
     void setCurrentPermission(String currentPermission) {
-        this.currentPermission = Enum.valueOf(permissionEnum, currentPermission);
+        setCurrentPermission(Enum.valueOf(permissionEnum, currentPermission));
+    }
+
+    void setCurrentPermission(T permission) {
+        this.currentPermission = permission;
         synchronized (listeners) {
             for (OnChangePermissionListener<T> listener : listeners) {
                 listener.onChangePermission(this.currentPermission);
