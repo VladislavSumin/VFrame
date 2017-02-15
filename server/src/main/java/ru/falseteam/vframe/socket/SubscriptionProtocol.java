@@ -11,6 +11,7 @@ public class SubscriptionProtocol extends ProtocolAbstract {
         String eventName = data.get("eventName").toString();
         if (requestType == null || eventName == null) return;
         Container container = new Container(getName(), true);
+        container.data.put("eventName", eventName);
 
         if (requestType.equals("subscribe")) {
             container.data.put("subscription",
