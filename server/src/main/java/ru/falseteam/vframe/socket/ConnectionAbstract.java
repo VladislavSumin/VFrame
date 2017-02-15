@@ -28,7 +28,7 @@ public abstract class ConnectionAbstract<T extends Enum<T>> {
     private final SocketWorker<T> worker;
     private ObjectOutputStream out;
 
-    protected T permission;
+    private T permission;
 
     private boolean connected = true;
     long lastPing;
@@ -134,5 +134,14 @@ public abstract class ConnectionAbstract<T extends Enum<T>> {
 
     public SocketWorker<T> getWorker() {
         return worker;
+    }
+
+    public T getPermission() {
+        return permission;
+    }
+
+    public void setPermission(T permission) {
+        //TODO send sync to client;
+        this.permission = permission;
     }
 }

@@ -21,7 +21,7 @@ import java.util.*;
  * @version 4.1
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
-public class SocketWorker {
+public class SocketWorker<T extends Enum<T>> {
     private static final Logger log = LogManager.getLogger();
 
     private final Object lock = new Object();
@@ -74,7 +74,10 @@ public class SocketWorker {
 
     private TimerTask pingTask;
 
-    public SocketWorker(String ip, int port, VFKeystore keystore, SubscriptionManager subscriptionManager) {
+    public SocketWorker(String ip, int port, VFKeystore keystore,
+                        Class<T> permissionEnum, T disconnectedPermission, T defaultPermission,
+                        SubscriptionManager subscriptionManager) {
+        //TODO permission.
         this.subscriptionManager = subscriptionManager;
         subscriptionManager.init(this);
         socketAddress = new InetSocketAddress(ip, port);

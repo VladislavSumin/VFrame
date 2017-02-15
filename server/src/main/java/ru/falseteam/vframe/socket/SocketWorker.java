@@ -17,7 +17,7 @@ import java.util.TimerTask;
  * Listen socket and create connection class.
  *
  * @author Sumin Vladislav
- * @version 4.6
+ * @version 4.7
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class SocketWorker<T extends Enum<T>> {
@@ -31,6 +31,7 @@ public class SocketWorker<T extends Enum<T>> {
     private final List<ConnectionAbstract> connections = new LinkedList<>();
     private final PermissionManager<T> permissionManager;
     private final SubscriptionManager<T> subscriptionManager;
+    private final ConnectionFactory connectionFactory;
 
     private final TimerTask pingTask = new TimerTask() {
         @Override
@@ -60,15 +61,17 @@ public class SocketWorker<T extends Enum<T>> {
 
         this.permissionManager = permissionManager;
         this.subscriptionManager = subscriptionManager;
+        this.connectionFactory = connectionFactory;
         try {
             this.socket = (SSLServerSocket) keystore.getSSLContext().getServerSocketFactory().createServerSocket(port);
         } catch (IOException e) {
             log.fatal("VFrame can not open port {}", port);
             throw new VFrameRuntimeException(e);
         }
+    }
 
+    public void start() {
         final SocketWorker link = this;
-
         //Run listen thread
         new Thread("SocketWorker port " + socket.getLocalPort()) {
             @Override
@@ -84,7 +87,6 @@ public class SocketWorker<T extends Enum<T>> {
                 }
             }
         }.start();
-
         VFrame.addPeriodicalTimerTask(pingTask, 16000);
     }
 
