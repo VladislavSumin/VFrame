@@ -16,7 +16,7 @@ import java.util.Map;
  * Base abstract class to server connection.
  *
  * @author Sumin Vladislav
- * @version 3.8
+ * @version 3.9
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public abstract class ConnectionAbstract<T extends Enum<T>> {
@@ -139,7 +139,8 @@ public abstract class ConnectionAbstract<T extends Enum<T>> {
     }
 
     public void setPermission(T permission) {
-        //TODO send sync to client;
         this.permission = permission;
+        Container c = new Container("SyncPermissionProtocol", true);
+        c.data.put("permission", permission);
     }
 }

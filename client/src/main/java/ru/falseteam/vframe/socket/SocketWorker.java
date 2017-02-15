@@ -18,10 +18,11 @@ import java.util.*;
  * Base client socket worker class
  *
  * @author Sumin Vladislav
- * @version 4.2
+ * @version 4.3
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class SocketWorker<T extends Enum<T>> {
+
     private static final Logger log = LogManager.getLogger();
 
     private final Object lock = new Object();
@@ -29,7 +30,7 @@ public class SocketWorker<T extends Enum<T>> {
     private final SocketAddress socketAddress;
 
     private final Map<String, ProtocolAbstract> protocols = new HashMap<>();
-    private final Set<OnConnectionChangeStateListener> listeners = new HashSet<>();
+    private final Set<OnChangePermissionListener<T>> listeners = new HashSet<>();
 
     private final SubscriptionManager subscriptionManager;
 
@@ -41,8 +42,13 @@ public class SocketWorker<T extends Enum<T>> {
     private boolean connected = false;
     long lastPing = System.currentTimeMillis();
 
-    public interface OnConnectionChangeStateListener {
-        void onConnectionChangeState(boolean connected);
+    private final Class<T> permissionEnum;
+    private final T defaultPermission;
+    private final T disconnectedPermission;
+    private T currentPermission;
+
+    public interface OnChangePermissionListener<T extends Enum<T>> {
+        void onChangePermission(T permission);
     }
 
     private final SocketWorker link = this;
@@ -76,11 +82,17 @@ public class SocketWorker<T extends Enum<T>> {
 
     public SocketWorker(String ip, int port, VFKeystore keystore,
                         Class<T> permissionEnum, T disconnectedPermission, T defaultPermission) {
-        //TODO permission.
+        this.permissionEnum = permissionEnum;
+        this.defaultPermission = defaultPermission;
+        this.disconnectedPermission = disconnectedPermission;
+
+        currentPermission = disconnectedPermission;
         this.subscriptionManager = new SubscriptionManager(this);
         socketAddress = new InetSocketAddress(ip, port);
         ssf = keystore.getSSLContext().getSocketFactory();
+
         addProtocol(new Ping());
+        addProtocol(new SyncPermissionProtocol());
     }
 
     public void start() {
@@ -176,22 +188,20 @@ public class SocketWorker<T extends Enum<T>> {
     private void setConnected(boolean connected) {
         this.connected = connected;
         if (connected) {
+            currentPermission = defaultPermission;
             subscriptionManager.resubscribeAll();
-        }
-        synchronized (listeners) {
-            for (OnConnectionChangeStateListener listener : listeners) {
-                listener.onConnectionChangeState(connected);
-            }
+        } else {
+            currentPermission = disconnectedPermission;
         }
     }
 
-    public void addOnConnectionChangeStateListener(OnConnectionChangeStateListener listener) {
+    public void addOnConnectionChangeStateListener(OnChangePermissionListener<T> listener) {
         synchronized (listeners) {
             listeners.add(listener);
         }
     }
 
-    public void removeOnConnectionChangeStateListener(OnConnectionChangeStateListener listener) {
+    public void removeOnConnectionChangeStateListener(OnChangePermissionListener<T> listener) {
         synchronized (listeners) {
             listeners.remove(listener);
         }
@@ -203,5 +213,19 @@ public class SocketWorker<T extends Enum<T>> {
 
     public SubscriptionManager getSubscriptionManager() {
         return subscriptionManager;
+    }
+
+    void setCurrentPermission(String currentPermission) {
+        this.currentPermission = Enum.valueOf(permissionEnum, currentPermission);
+        synchronized (listeners) {
+            for (OnChangePermissionListener<T> listener : listeners) {
+                listener.onChangePermission(this.currentPermission);
+            }
+        }
+    }
+
+    public T getCurrentPermission() {
+        return currentPermission;
+        //TODO добавить слушателя смены пермишена.
     }
 }
