@@ -7,10 +7,10 @@ import java.util.Map;
 
 /**
  * @author Sumin Vladislav
- * @version 1.3
+ * @version 1.4
  */
 public class SubscriptionManager {
-    private SocketWorker sw;
+    private final SocketWorker sw;
 
     private class Pair {
         int subscriptionCount = 1;
@@ -20,7 +20,7 @@ public class SubscriptionManager {
 
     private final Map<String, Pair> data = new HashMap<>();
 
-    void init(final SocketWorker sw) {
+    SubscriptionManager(SocketWorker sw) {
         this.sw = sw;
     }
 

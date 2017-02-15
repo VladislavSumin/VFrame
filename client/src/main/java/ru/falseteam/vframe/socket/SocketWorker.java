@@ -18,7 +18,7 @@ import java.util.*;
  * Base client socket worker class
  *
  * @author Sumin Vladislav
- * @version 4.1
+ * @version 4.2
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class SocketWorker<T extends Enum<T>> {
@@ -75,11 +75,9 @@ public class SocketWorker<T extends Enum<T>> {
     private TimerTask pingTask;
 
     public SocketWorker(String ip, int port, VFKeystore keystore,
-                        Class<T> permissionEnum, T disconnectedPermission, T defaultPermission,
-                        SubscriptionManager subscriptionManager) {
+                        Class<T> permissionEnum, T disconnectedPermission, T defaultPermission) {
         //TODO permission.
-        this.subscriptionManager = subscriptionManager;
-        subscriptionManager.init(this);
+        this.subscriptionManager = new SubscriptionManager(this);
         socketAddress = new InetSocketAddress(ip, port);
         ssf = keystore.getSSLContext().getSocketFactory();
         addProtocol(new Ping());
