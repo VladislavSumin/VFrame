@@ -10,7 +10,35 @@ import java.util.Map;
  * @version 1.4
  */
 public class SubscriptionManager {
-    private final SocketWorker sw;
+    private static class SubscriptionSyncProtocol extends ProtocolAbstract {
+        @Override
+        public void exec(Map<String, Object> map, SocketWorker worker) {
+            worker.getSubscriptionManager().dataUpdate(map.get("eventName").toString(),
+                    (Map<String, Object>) map.get("data"));
+        }
+    }
+
+    private static class SubscriptionProtocol extends ProtocolAbstract {
+        @Override
+        public void exec(Map<String, Object> map, SocketWorker worker) {
+            worker.getSubscriptionManager()
+                    .setFailed(map.get("eventName").toString(), (boolean) map.get("subscription"));
+        }
+
+        static Container subscribe(String eventName) {
+            Container container = new Container(SubscriptionProtocol.class.getSimpleName(), true);
+            container.data.put("requestType", "subscribe");
+            container.data.put("eventName", eventName);
+            return container;
+        }
+
+        static Container unsubscribe(String eventName) {
+            Container container = new Container(SubscriptionProtocol.class.getSimpleName(), true);
+            container.data.put("requestType", "unsubscribe");
+            container.data.put("eventName", eventName);
+            return container;
+        }
+    }
 
     private class Pair {
         int subscriptionCount = 1;
@@ -18,10 +46,13 @@ public class SubscriptionManager {
         Map<String, Object> data = null;
     }
 
+    private final SocketWorker sw;
     private final Map<String, Pair> data = new HashMap<>();
 
     SubscriptionManager(SocketWorker sw) {
         this.sw = sw;
+        sw.addProtocol(new SubscriptionSyncProtocol());
+        sw.addProtocol(new SubscriptionProtocol());
     }
 
     public void subscribe(final String eventName) {
@@ -97,7 +128,7 @@ public class SubscriptionManager {
         }
     }
 
-    public void resubscribeFailed() {
+    public void resubscribeFailed() {//TODO попровать это.
         synchronized (data) {
             for (Map.Entry<String, Pair> key : data.entrySet()) {
                 if (key.getValue().subscriptionsFailed)

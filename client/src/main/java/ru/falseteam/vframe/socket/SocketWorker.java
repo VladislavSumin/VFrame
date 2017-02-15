@@ -81,8 +81,6 @@ public class SocketWorker<T extends Enum<T>> {
         socketAddress = new InetSocketAddress(ip, port);
         ssf = keystore.getSSLContext().getSocketFactory();
         addProtocol(new Ping());
-        addProtocol(new SubscriptionSyncProtocol());
-        addProtocol(new SubscriptionProtocol());
     }
 
     public void start() {
