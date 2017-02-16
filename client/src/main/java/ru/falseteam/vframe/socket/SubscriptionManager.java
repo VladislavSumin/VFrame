@@ -121,7 +121,9 @@ public class SubscriptionManager {
     }
 
     public Map<String, Object> getData(String eventName) {
-        return data.get(eventName).data;
+        Pair pair = data.get(eventName);
+        if (pair == null) return null;
+        return pair.data;
     }
 
     private void runFromUiThread(Runnable run) {
