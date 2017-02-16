@@ -19,7 +19,7 @@ public class BinaryUtils {
      * @return {T} if successfully read binary file of {null} if not.
      */
     @SuppressWarnings("unchecked")
-    static <T> T loadFromBinaryFile(String path) {
+    public static <T> T loadFromBinaryFile(String path) {
         try {
             ObjectInputStream stream = new ObjectInputStream(new FileInputStream(path));
             T data = (T) stream.readObject();
@@ -39,7 +39,7 @@ public class BinaryUtils {
      * @throws {@link RuntimeException} if can not save file.
      */
     @SuppressWarnings("JavaDoc")
-    static <T> void saveToBinaryFile(T data, String path) {
+    public static <T> void saveToBinaryFile(T data, String path) {
         try {
             ObjectOutputStream stream = new ObjectOutputStream(new FileOutputStream(path));
             stream.writeObject(data);
