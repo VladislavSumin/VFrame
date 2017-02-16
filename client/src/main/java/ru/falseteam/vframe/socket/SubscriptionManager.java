@@ -7,8 +7,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Subscription manager
+ *
  * @author Sumin Vladislav
- * @version 1.4
  */
 public class SubscriptionManager {
     private static class SubscriptionSyncProtocol extends ProtocolAbstract {
@@ -91,7 +92,6 @@ public class SubscriptionManager {
             Pair pair = data.get(eventName);
             if (pair.subscriptionCount == 1) {
                 data.remove(eventName);
-
                 runFromUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -137,7 +137,7 @@ public class SubscriptionManager {
         }
     }
 
-    void setFailed(String eventName, boolean failed) {
+    private void setFailed(String eventName, boolean failed) {
         synchronized (data) {
             Pair pair = data.get(eventName);
             if (pair != null)
