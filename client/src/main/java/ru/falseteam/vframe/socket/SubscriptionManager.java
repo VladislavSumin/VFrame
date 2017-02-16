@@ -109,7 +109,7 @@ public class SubscriptionManager {
         synchronized (data) {
             Pair pair = data.get(eventName);
             if (pair != null) {
-                if (pair.filename != null && !pair.data.equals(newData)) {
+                if (pair.filename != null && !newData.equals(pair.data)) {
                     BinaryUtils.saveToBinaryFile(newData, pair.filename);
                 }
                 pair.data = newData;
