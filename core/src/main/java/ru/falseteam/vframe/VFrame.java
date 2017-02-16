@@ -11,9 +11,11 @@ import java.util.TimerTask;
 /**
  * Main library class.
  * Must be init before use another library classes.
+ * <p>
+ * Главный класс библиотеки.
+ * Метод init() должен быть вызван до начала работы с библиотекой.
  *
  * @author Sumin Vladislav
- * @version 1.0
  */
 @SuppressWarnings("unused")
 public class VFrame {

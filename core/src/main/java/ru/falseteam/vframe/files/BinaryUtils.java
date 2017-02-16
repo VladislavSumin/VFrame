@@ -30,10 +30,9 @@ public class BinaryUtils {
         }
     }
 
-
     /**
      * Save binary file to local storage
-     * 
+     *
      * @param data data to save
      * @param path path to save
      * @param <T>  type of data
