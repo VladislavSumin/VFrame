@@ -1,13 +1,15 @@
 package ru.falseteam.vframe.socket;
 
+import ru.falseteam.vframe.files.BinaryUtils;
 import ru.falseteam.vframe.redraw.Redrawer;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Subscription manager
+ *
  * @author Sumin Vladislav
- * @version 1.4
  */
 public class SubscriptionManager {
     private static class SubscriptionSyncProtocol extends ProtocolAbstract {
@@ -44,6 +46,7 @@ public class SubscriptionManager {
         int subscriptionCount = 1;
         boolean subscriptionsFailed = false;
         Map<String, Object> data = null;
+        String filename = null;
     }
 
     private final SocketWorker sw;
@@ -53,6 +56,18 @@ public class SubscriptionManager {
         this.sw = sw;
         sw.addProtocol(new SubscriptionSyncProtocol());
         sw.addProtocol(new SubscriptionProtocol());
+    }
+
+    public void subscribe(final String eventName, final String filename) {//TODO переделать нормально
+        synchronized (data) {
+            subscribe(eventName);
+            Pair pair = data.get(eventName);
+            pair.filename = filename;
+            if (pair.data == null) {
+                pair.data = BinaryUtils.loadFromBinaryFile(filename);
+                Redrawer.redraw();//todo fix this
+            }
+        }
     }
 
     public void subscribe(final String eventName) {
@@ -77,7 +92,6 @@ public class SubscriptionManager {
             Pair pair = data.get(eventName);
             if (pair.subscriptionCount == 1) {
                 data.remove(eventName);
-
                 runFromUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -95,6 +109,9 @@ public class SubscriptionManager {
         synchronized (data) {
             Pair pair = data.get(eventName);
             if (pair != null) {
+                if (pair.filename != null && !newData.equals(pair.data)) {
+                    BinaryUtils.saveToBinaryFile(newData, pair.filename);
+                }
                 pair.data = newData;
             }
         }
@@ -104,7 +121,9 @@ public class SubscriptionManager {
     }
 
     public Map<String, Object> getData(String eventName) {
-        return data.get(eventName).data;
+        Pair pair = data.get(eventName);
+        if (pair == null) return null;
+        return pair.data;
     }
 
     private void runFromUiThread(Runnable run) {
@@ -120,7 +139,7 @@ public class SubscriptionManager {
         }
     }
 
-    void setFailed(String eventName, boolean failed) {
+    private void setFailed(String eventName, boolean failed) {
         synchronized (data) {
             Pair pair = data.get(eventName);
             if (pair != null)

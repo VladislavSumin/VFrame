@@ -2,10 +2,9 @@ package ru.falseteam.vframe;
 
 /**
  * Default VFrame runtime exception
- * All library classes can throw this exception
+ * All library classes can throw this exception on error
  *
  * @author Sumin Vladislav
- * @version 1.1
  */
 @SuppressWarnings("unused")
 public class VFrameRuntimeException extends RuntimeException {
