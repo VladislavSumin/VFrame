@@ -10,12 +10,14 @@ import java.util.TimerTask;
 
 /**
  * Main library class.
- * <p>
  * Must be init before use another library classes.
+ * <p>
+ * Главный класс библиотеки.
+ * Метод init() должен быть вызван до начала работы с библиотекой.
  *
  * @author Sumin Vladislav
- * @version 1.0
  */
+@SuppressWarnings("unused")
 public class VFrame {
     private static final Logger log = LogManager.getLogger();
 
@@ -75,8 +77,14 @@ public class VFrame {
         }
     }
 
-    public static boolean isInitialized() {
-        return init;
+    public static void addPeriodicalTimerTask(TimerTask task, Date firstTime, long period) {
+        synchronized (lock) {
+            if (!init) {
+                initError();
+                return;
+            }
+            timer.schedule(task, firstTime, period);
+        }
     }
 
     private static void initError() {

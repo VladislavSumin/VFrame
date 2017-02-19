@@ -1,26 +1,20 @@
 package ru.falseteam.vframe.console;
 
 import org.apache.commons.cli.*;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * Base abstract command realization
  *
  * @author Sumin Vladislav
- * @version 2.3
+ * @version 2.5
  */
-@SuppressWarnings({"unused", "SameParameterValue"})
+@SuppressWarnings({"WeakerAccess", "unused"})
 public abstract class CommandAbstract {
-    private static final Logger log = LogManager.getLogger();
-
     private Options options = new Options();
-
 
     public String getName() {
         return getClass().getSimpleName().toLowerCase();
     }
-
 
     public final void exec(String param) {
         try {
@@ -39,7 +33,7 @@ public abstract class CommandAbstract {
     }
 
     protected final void addOptions(String shortOptions, String longOptions,
-                              int argsCount, boolean required, String descriptions) {
+                                    int argsCount, boolean required, String descriptions) {
         boolean hasArgs = argsCount != 0;
         Option option = new Option(shortOptions, longOptions, hasArgs, descriptions);
         option.setArgs(argsCount);
@@ -47,5 +41,4 @@ public abstract class CommandAbstract {
         option.setArgName(longOptions);
         options.addOption(option);
     }
-
 }

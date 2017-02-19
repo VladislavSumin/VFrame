@@ -5,6 +5,26 @@ apply plugin: 'java'
 
 sourceCompatibility = 1.7
 
+subprojects {
+    apply plugin: 'java'
+
+    task buildAll(type: Jar, dependsOn: 'packageSources') {
+        manifest {
+        }
+        baseName = 'VFrame-' + project.name
+        destinationDir = file("$rootDir")
+        from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+        with jar
+    }
+
+    task packageSources(type: Jar, dependsOn: 'classes') {
+        from sourceSets.main.allSource
+        baseName = 'VFrame-' + project.name
+        destinationDir = file("$rootDir")
+        classifier = 'sources'
+    }
+}
+
 repositories {
     mavenCentral()
 }

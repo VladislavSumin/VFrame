@@ -7,6 +7,7 @@ import ru.falseteam.vframe.VFrameRuntimeException;
 
 import javax.net.ssl.SSLServerSocket;
 import java.io.IOException;
+import java.net.Socket;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,22 +17,29 @@ import java.util.TimerTask;
  * Listen socket and create connection class.
  *
  * @author Sumin Vladislav
- * @version 4.2
+ * @version 4.8
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
-public class ServerSocketWorker {
+public class SocketWorker<T extends Enum<T>> {
     private static final Logger log = LogManager.getLogger();
 
+    public interface ConnectionFactory {
+        ConnectionAbstract createNewConnection(Socket socket, SocketWorker parent);
+    }
+
     private final SSLServerSocket socket;
-    private final List<ServerConnectionAbstract> connections = new LinkedList<>();
+    private final List<ConnectionAbstract> connections = new LinkedList<>();
+    private final PermissionManager<T> permissionManager;
+    private final SubscriptionManager<T> subscriptionManager;
+    private final ConnectionFactory connectionFactory;
 
     private final TimerTask pingTask = new TimerTask() {
         @Override
         public void run() {
             synchronized (connections) {
-                Iterator<ServerConnectionAbstract> iterator = connections.iterator();
+                Iterator<ConnectionAbstract> iterator = connections.iterator();
                 while (iterator.hasNext()) {
-                    ServerConnectionAbstract connection = iterator.next();
+                    ConnectionAbstract connection = iterator.next();
                     if (connection.lastPing + 24000 > System.currentTimeMillis()) {
                         connection.send(Ping.getRequest());
                     } else {
@@ -44,18 +52,28 @@ public class ServerSocketWorker {
     };
 
 
-    public ServerSocketWorker(final ServerConnectionFactory connectionFactory, final VFKeystore keystore, int port) {
+    public SocketWorker(
+            final ConnectionFactory connectionFactory,
+            final VFKeystore keystore,
+            int port,
+            PermissionManager<T> permissionManager) {
+
+        this.permissionManager = permissionManager;
+        this.subscriptionManager = new SubscriptionManager<>();
+        this.connectionFactory = connectionFactory;
         try {
             this.socket = (SSLServerSocket) keystore.getSSLContext().getServerSocketFactory().createServerSocket(port);
         } catch (IOException e) {
             log.fatal("VFrame can not open port {}", port);
             throw new VFrameRuntimeException(e);
         }
+    }
 
-        final ServerSocketWorker link = this;
-
+    public void start() {
+        //TODO запретить старт стоп старт послеждовательность
+        final SocketWorker link = this;
         //Run listen thread
-        new Thread("ServerSocketWorker port " + socket.getLocalPort()) {
+        new Thread("SocketWorker port " + socket.getLocalPort()) {
             @Override
             public void run() {
                 VFrame.print("VFrame: port " + socket.getLocalPort() + " open and listening");
@@ -69,7 +87,6 @@ public class ServerSocketWorker {
                 }
             }
         }.start();
-
         VFrame.addPeriodicalTimerTask(pingTask, 16000);
     }
 
@@ -91,9 +108,9 @@ public class ServerSocketWorker {
 
         //Close all connection
         synchronized (connections) {
-            Iterator<ServerConnectionAbstract> iterator = connections.iterator();
+            Iterator<ConnectionAbstract> iterator = connections.iterator();
             while (iterator.hasNext()) {
-                ServerConnectionAbstract connection = iterator.next();
+                ConnectionAbstract connection = iterator.next();
                 iterator.remove();
                 connection.disconnect("server stop");
             }
@@ -102,21 +119,33 @@ public class ServerSocketWorker {
 
     public void sandToAll(Container container) {
         synchronized (connections) {
-            for (ServerConnectionAbstract connection : connections) {
+            for (ConnectionAbstract connection : connections) {
                 connection.send(container);
             }
         }
     }
 
-    public void addToClientsList(ServerConnectionAbstract connection) {
+    public void addToClientsList(ConnectionAbstract connection) {
         synchronized (connections) {
             connections.add(connection);
         }
     }
 
-    public void removeFromClientsList(ServerConnectionAbstract connection) {
+    public void removeFromClientsList(ConnectionAbstract connection) {
         synchronized (connections) {
             connections.remove(connection);
         }
+    }
+
+    public List<ConnectionAbstract> getConnections() {
+        return connections;
+    }
+
+    public PermissionManager<T> getPermissionManager() {
+        return permissionManager;
+    }
+
+    public SubscriptionManager<T> getSubscriptionManager() {
+        return subscriptionManager;
     }
 }

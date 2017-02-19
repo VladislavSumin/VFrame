@@ -7,14 +7,14 @@ import java.util.Map;
  * Internal ping protocol
  *
  * @author Sumin Vladislav
- * @version 1.2
+ * @version 1.3
  */
 @SuppressWarnings("WeakerAccess")
-class Ping extends ServerProtocolAbstract {
+class Ping extends ProtocolAbstract {
 
     @Override
-    public void exec(Map<String, Object> data, ServerConnectionAbstract connection) {
-        ((ServerConnectionAbstract) connection).lastPing = System.currentTimeMillis();
+    public void exec(Map<String, Object> data, ConnectionAbstract connection) {
+        connection.lastPing = System.currentTimeMillis();
     }
 
     @Override

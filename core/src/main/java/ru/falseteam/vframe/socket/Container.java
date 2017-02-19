@@ -8,9 +8,9 @@ import java.util.Map;
  * Base serializable class to transfer data.
  *
  * @author Sumin Vladislav
- * @version 1.2
+ * @version 1.3
  */
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class Container implements Serializable {
     public final String protocol;
     public Map<String, Object> data;

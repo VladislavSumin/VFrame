@@ -18,18 +18,21 @@ import java.util.*;
  * Base client socket worker class
  *
  * @author Sumin Vladislav
- * @version 4.0
+ * @version 4.3
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
-public class ClientSocketWorker {
+public class SocketWorker<T extends Enum<T>> {
+
     private static final Logger log = LogManager.getLogger();
 
     private final Object lock = new Object();
 
     private final SocketAddress socketAddress;
 
-    private final Map<String, ClientProtocolAbstract> protocols = new HashMap<>();
-    private final Set<OnConnectionChangeStateListener> listeners = new HashSet<>();
+    private final Map<String, ProtocolAbstract> protocols = new HashMap<>();
+    private final Set<OnChangePermissionListener<T>> listeners = new HashSet<>();
+
+    private final SubscriptionManager subscriptionManager;
 
     private SSLSocketFactory ssf;
     private SSLSocket socket;
@@ -39,11 +42,16 @@ public class ClientSocketWorker {
     private boolean connected = false;
     long lastPing = System.currentTimeMillis();
 
-    public interface OnConnectionChangeStateListener {
-        void onConnectionChangeState(boolean connected);
+    private final Class<T> permissionEnum;
+    private final T defaultPermission;
+    private final T disconnectedPermission;
+    private T currentPermission;
+
+    public interface OnChangePermissionListener<T extends Enum<T>> {
+        void onChangePermission(T permission);
     }
 
-    private final ClientSocketWorker link = this;
+    private final SocketWorker link = this;
     private final Runnable run = new Runnable() {
         @Override
         public void run() {
@@ -55,7 +63,7 @@ public class ClientSocketWorker {
                     setConnected(true);
                     while (work) {
                         Container container = (Container) in.readObject();
-                        ClientProtocolAbstract protocol = protocols.get(container.protocol);
+                        ProtocolAbstract protocol = protocols.get(container.protocol);
                         if (protocol == null) {
                             log.error("VFrame: Server used unknown protocol {}", container.protocol);
                             continue;
@@ -72,16 +80,25 @@ public class ClientSocketWorker {
 
     private TimerTask pingTask;
 
-    public ClientSocketWorker(String ip, int port, VFKeystore keystore) {
+    public SocketWorker(String ip, int port, VFKeystore keystore,
+                        Class<T> permissionEnum, T disconnectedPermission, T defaultPermission) {
+        this.permissionEnum = permissionEnum;
+        this.defaultPermission = defaultPermission;
+        this.disconnectedPermission = disconnectedPermission;
+
+        currentPermission = disconnectedPermission;
+        this.subscriptionManager = new SubscriptionManager(this);
         socketAddress = new InetSocketAddress(ip, port);
         ssf = keystore.getSSLContext().getSocketFactory();
+
         addProtocol(new Ping());
+        addProtocol(new SyncPermissionProtocol());
     }
 
     public void start() {
         synchronized (lock) {
             if (work) {
-                log.error("VFrame: ClientSocketWorker already worked");
+                log.error("VFrame: SocketWorker already worked");
                 return;
             }
             work = true;
@@ -102,7 +119,7 @@ public class ClientSocketWorker {
     public void stop() {
         synchronized (lock) {
             if (!work) {
-                log.error("VFrame: ClientSocketWorker already stopped");
+                log.error("VFrame: SocketWorker already stopped");
                 return;
             }
             work = false;
@@ -135,7 +152,7 @@ public class ClientSocketWorker {
         }.start();
     }
 
-    public void addProtocol(ClientProtocolAbstract protocol) {
+    public void addProtocol(ProtocolAbstract protocol) {
         protocols.put(protocol.getName(), protocol);
     }
 
@@ -170,20 +187,21 @@ public class ClientSocketWorker {
 
     private void setConnected(boolean connected) {
         this.connected = connected;
-        synchronized (listeners) {
-            for (OnConnectionChangeStateListener listener : listeners) {
-                listener.onConnectionChangeState(connected);
-            }
+        if (connected) {
+            setCurrentPermission(defaultPermission);
+            subscriptionManager.resubscribeAll();
+        } else {
+            setCurrentPermission(disconnectedPermission);
         }
     }
 
-    public void addOnConnectionChangeStateListener(OnConnectionChangeStateListener listener) {
+    public void addOnConnectionChangeStateListener(OnChangePermissionListener<T> listener) {
         synchronized (listeners) {
             listeners.add(listener);
         }
     }
 
-    public void removeOnConnectionChangeStateListener(OnConnectionChangeStateListener listener) {
+    public void removeOnConnectionChangeStateListener(OnChangePermissionListener<T> listener) {
         synchronized (listeners) {
             listeners.remove(listener);
         }
@@ -191,5 +209,27 @@ public class ClientSocketWorker {
 
     public boolean isConnected() {
         return connected;
+    }
+
+    public SubscriptionManager getSubscriptionManager() {
+        return subscriptionManager;
+    }
+
+    void setCurrentPermission(String currentPermission) {
+        setCurrentPermission(Enum.valueOf(permissionEnum, currentPermission));
+    }
+
+    void setCurrentPermission(T permission) {
+        this.currentPermission = permission;
+        synchronized (listeners) {
+            for (OnChangePermissionListener<T> listener : listeners) {
+                listener.onChangePermission(this.currentPermission);
+            }
+        }
+    }
+
+    public T getCurrentPermission() {
+        return currentPermission;
+        //TODO добавить слушателя смены пермишена.
     }
 }

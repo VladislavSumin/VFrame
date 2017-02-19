@@ -16,36 +16,39 @@ import java.util.Map;
  * Base abstract class to server connection.
  *
  * @author Sumin Vladislav
- * @version 3.1
+ * @version 3.9
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
-public abstract class ServerConnectionAbstract {
+public abstract class ConnectionAbstract<T extends Enum<T>> {
     private static final Logger log = LogManager.getLogger();
 
-    private static final Map<String, ServerProtocolAbstract> defaultProtocols = new HashMap<>();
+    private static final Map<String, ProtocolAbstract> defaultProtocols = new HashMap<>();
 
     private final Socket socket;
-    private final ServerSocketWorker worker;
-
+    private final SocketWorker<T> worker;
     private ObjectOutputStream out;
+
+    private T permission;
 
     private boolean connected = true;
     long lastPing;
 
     static {
         addDefaultProtocol(new Ping());
+        addDefaultProtocol(new SubscriptionManager.SubscriptionProtocol());
     }
 
-    private static void addDefaultProtocol(ServerProtocolAbstract protocol) {
+    private static void addDefaultProtocol(ProtocolAbstract protocol) {
         defaultProtocols.put(protocol.getName(), protocol);
     }
 
-    public ServerConnectionAbstract(final Socket socket, final ServerSocketWorker worker) {
+    public ConnectionAbstract(final Socket socket, final SocketWorker<T> worker) {
         this.socket = socket;
         this.worker = worker;
         lastPing = System.currentTimeMillis();
+        permission = worker.getPermissionManager().getDefaultPermission();
 
-        final ServerConnectionAbstract link = this;
+        final ConnectionAbstract link = this;
         new Thread("Connection with " + socket.getInetAddress().getHostAddress()) {
             @Override
             public void run() {
@@ -59,15 +62,19 @@ public abstract class ServerConnectionAbstract {
                         //noinspection InfiniteLoopStatement
                         while (true) {
                             Container container = (Container) in.readObject();
-                            ServerProtocolAbstract protocol = defaultProtocols.get(container.protocol);
-                            if (protocol == null) protocol = getProtocols().get(container.protocol);
+                            ProtocolAbstract protocol = defaultProtocols.get(container.protocol);
+                            if (protocol == null) protocol = worker.getPermissionManager()
+                                    .getProtocols(permission).get(container.protocol);
                             if (protocol == null) {
-                                log.error("VFrame: client used unknown protocol {}", container.protocol);
-                                continue;
-                            }
-                            protocol.exec(container.data, link);
+                                PermissionManager.DefaultProtocol defaultProtocol =
+                                        worker.getPermissionManager().getDefaultProtocol();
+                                if (defaultProtocol == null)
+                                    log.error("VFrame: client used unknown protocol {}", container.protocol);
+                                else
+                                    defaultProtocol.exec(container, link);
+                            } else
+                                protocol.exec(container.data, link);
                         }
-
                     } catch (ClassNotFoundException e) {
                         disconnect(e.getMessage());
                     } catch (IOException ignore) {
@@ -86,17 +93,16 @@ public abstract class ServerConnectionAbstract {
 
     }
 
-
     public void disconnect() {
         disconnect(null);
     }
-
 
     public void disconnect(String reason) {
         synchronized (socket) {
             if (!connected) return;
             connected = false;
             worker.removeFromClientsList(this);
+            //TODO SubscriptionManager.removeSubscriber(this);
             onDisconnect();
             try {
                 socket.close();
@@ -124,8 +130,18 @@ public abstract class ServerConnectionAbstract {
         }
     }
 
-    /**
-     * @return Map with all user protocols.
-     */
-    protected abstract Map<String, ServerProtocolAbstract> getProtocols();
+    public SocketWorker<T> getWorker() {
+        return worker;
+    }
+
+    public T getPermission() {
+        return permission;
+    }
+
+    public void setPermission(T permission) {
+        this.permission = permission;
+        Container c = new Container("SyncPermissionProtocol", true);
+        c.data.put("permission", permission);
+        send(c);
+    }
 }
