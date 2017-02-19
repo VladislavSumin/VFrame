@@ -7,9 +7,14 @@ sourceCompatibility = 1.7
 
 subprojects {
     apply plugin: 'java'
-    jar {
+
+    task buildAll(type: Jar) {
+        manifest {
+        }
         baseName = 'VFrame-' + project.name
         destinationDir = file("$rootDir")
+        from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+        with jar
     }
 }
 
