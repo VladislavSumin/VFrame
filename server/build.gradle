@@ -1,26 +1,10 @@
 group 'VFrame'
 //version '1.8.1'
 
-apply plugin: 'java'
-
 sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
-}
-
-task packageSources(type: Jar, dependsOn: 'classes') {
-    from sourceSets.main.allSource
-    baseName = 'VFrame-' + project.name
-    classifier = 'sources'
-}
-
-task buildServer(type: Jar) {
-    manifest {
-    }
-    baseName = 'VFrame-' + project.name
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
 }
 
 dependencies {
