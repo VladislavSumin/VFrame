@@ -8,7 +8,7 @@ sourceCompatibility = 1.7
 subprojects {
     apply plugin: 'java'
 
-    task buildAll(type: Jar) {
+    task buildAll(type: Jar, dependsOn: 'packageSources') {
         manifest {
         }
         baseName = 'VFrame-' + project.name
