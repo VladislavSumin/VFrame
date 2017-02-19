@@ -7,12 +7,6 @@ repositories {
     mavenCentral()
 }
 
-task packageSources(type: Jar, dependsOn: 'classes') {
-    from sourceSets.main.allSource
-    baseName = 'VFrame-' + project.name
-    classifier = 'sources'
-}
-
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
 

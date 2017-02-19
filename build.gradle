@@ -16,6 +16,13 @@ subprojects {
         from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
         with jar
     }
+
+    task packageSources(type: Jar, dependsOn: 'classes') {
+        from sourceSets.main.allSource
+        baseName = 'VFrame-' + project.name
+        destinationDir = file("$rootDir")
+        classifier = 'sources'
+    }
 }
 
 repositories {
