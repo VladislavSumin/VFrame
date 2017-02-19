@@ -9,18 +9,14 @@ repositories {
     mavenCentral()
 }
 
+jar {
+    baseName = 'VFrame-' + project.name
+}
+
 task packageSources(type: Jar, dependsOn: 'classes') {
     from sourceSets.main.allSource
     baseName = 'VFrame-' + project.name
     classifier = 'sources'
-}
-
-task buildClient(type: Jar) {
-    manifest {
-    }
-    baseName = 'VFrame-' + project.name
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
 }
 
 dependencies {
