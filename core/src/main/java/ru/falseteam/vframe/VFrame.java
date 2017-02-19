@@ -87,6 +87,18 @@ public class VFrame {
         }
     }
 
+    public static void addEveryOneDayPeriodicalTask(TimerTask task, long timeOfDay) {
+        synchronized (lock) {
+            if (!init) {
+                initError();
+                return;
+            }
+            long t = System.currentTimeMillis();
+            t -= t % (1000 * 60 * 60 * 24) + 3 * 60 * 60 * 1000; //Magic
+            timer.scheduleAtFixedRate(task, new Date(t + timeOfDay), 1000 * 60 * 60 * 24);
+        }
+    }
+
     private static void initError() {
         final String error = "VFrame not init";
         log.fatal(error);
