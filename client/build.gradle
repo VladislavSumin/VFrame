@@ -1,16 +1,10 @@
 group 'VFrame'
 //version '1.0.0'
 
-apply plugin: 'java'
-
 sourceCompatibility = 1.7
 
 repositories {
     mavenCentral()
-}
-
-jar {
-    baseName = 'VFrame-' + project.name
 }
 
 task packageSources(type: Jar, dependsOn: 'classes') {

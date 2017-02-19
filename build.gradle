@@ -5,6 +5,14 @@ apply plugin: 'java'
 
 sourceCompatibility = 1.7
 
+subprojects {
+    apply plugin: 'java'
+    jar {
+        baseName = 'VFrame-' + project.name
+        destinationDir = file("$rootDir")
+    }
+}
+
 repositories {
     mavenCentral()
 }
