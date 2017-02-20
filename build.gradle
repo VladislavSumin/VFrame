@@ -7,7 +7,9 @@ sourceCompatibility = 1.7
 
 subprojects {
     apply plugin: 'java'
+}
 
+configure(subprojects.findAll {it.name != 'core'}) {
     task buildAll(type: Jar, dependsOn: 'packageSources') {
         manifest {
         }
@@ -18,7 +20,7 @@ subprojects {
     }
 
     task packageSources(type: Jar, dependsOn: 'classes') {
-        from sourceSets.main.allSource
+        from ([ project(':core').sourceSets.main.allSource, sourceSets.main.allSource])
         baseName = 'VFrame-' + project.name
         destinationDir = file("$rootDir")
         classifier = 'sources'
