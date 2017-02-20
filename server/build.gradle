@@ -3,14 +3,7 @@ group 'VFrame'
 
 sourceCompatibility = 1.8
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.11'
-
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.7'
-
     compile project(':core')
 }
