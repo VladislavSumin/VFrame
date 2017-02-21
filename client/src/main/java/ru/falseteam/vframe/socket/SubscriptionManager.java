@@ -12,8 +12,6 @@ import java.util.Map;
  * @author Sumin Vladislav
  */
 public class SubscriptionManager {
-    private String cacheDir = null;
-
     private static class SubscriptionSyncProtocol extends ProtocolAbstract {
         @Override
         public void exec(Map<String, Object> map, SocketWorker worker) {
@@ -31,7 +29,7 @@ public class SubscriptionManager {
 
         static Container subscribe(String eventName) {
             Container container = new Container(SubscriptionProtocol.class.getSimpleName(), true);
-            container.data.put("requestType", "subscribeInternal");
+            container.data.put("requestType", "subscribe");
             container.data.put("eventName", eventName);
             return container;
         }
@@ -60,9 +58,8 @@ public class SubscriptionManager {
         sw.addProtocol(new SubscriptionProtocol());
     }
 
-    public void subscribeWithCache(final String eventName) {//TODO переделать нормально
+    public void subscribe(final String eventName, final String filename) {//TODO переделать нормально
         synchronized (data) {
-            String filename = cacheDir + eventName + ".bin";
             subscribe(eventName);
             Pair pair = data.get(eventName);
             pair.filename = filename;
@@ -159,7 +156,5 @@ public class SubscriptionManager {
         }
     }
 
-    public void setCacheDir(String cacheDir) {
-        this.cacheDir = cacheDir + "/";
-    }
+    //TODO автоподписка после реконнекта. Важно!
 }
