@@ -58,6 +58,16 @@ public class VFrame {
     }
 
     /**
+     * Printing msg with String.format to console with time tag.
+     *
+     * @param msg    - msg to print
+     * @param vararg - args from String.format
+     */
+    public static void print(String msg, String... vararg) {
+        print(String.format(msg, vararg));
+    }
+
+    /**
      * Printing msg to console with time tag.
      *
      * @param msg - msg to print
