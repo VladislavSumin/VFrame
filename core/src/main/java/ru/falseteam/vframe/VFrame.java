@@ -63,7 +63,7 @@ public class VFrame {
      * @param msg    - msg to print
      * @param vararg - args from String.format
      */
-    public static void print(String msg, String... vararg) {
+    public static void print(String msg, Object... vararg) {
         print(String.format(msg, vararg));
     }
 
