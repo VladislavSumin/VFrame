@@ -63,7 +63,7 @@ public class VFrame {
      * @param msg - msg to print
      */
     public static void print(String msg) {
-        SimpleDateFormat format = new SimpleDateFormat("[HH:mm:ss.S] ");
+        SimpleDateFormat format = new SimpleDateFormat("[HH:mm:ss.SSS] ");
         System.out.println(format.format(new Date()) + msg);
     }
 
