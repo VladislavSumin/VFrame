@@ -27,6 +27,7 @@ public abstract class ConnectionAbstract<T extends Enum<T>> {
     private final Socket socket;
     private final SocketWorker<T> worker;
     private ObjectOutputStream out;
+    private ObjectInputStream in;
 
     private T permission;
 
@@ -54,7 +55,7 @@ public abstract class ConnectionAbstract<T extends Enum<T>> {
             public void run() {
                 while (connected) {
                     try {
-                        ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+                        in = new ObjectInputStream(socket.getInputStream());
                         out = new ObjectOutputStream(socket.getOutputStream());
                         log.trace("Client {} connected", socket.getInetAddress().getHostAddress());
                         worker.addToClientsList(link);
@@ -109,6 +110,11 @@ public abstract class ConnectionAbstract<T extends Enum<T>> {
             } catch (IOException e) {
                 log.fatal("Cannot close port");
                 throw new VFrameRuntimeException(e);
+            }
+            //TODO тест костыля
+            try {
+                in.close();
+            } catch (IOException ignore) {
             }
             if (reason != null)
                 log.trace("Client {} disconnected, reason: {}", socket.getInetAddress().getHostAddress(), reason);
