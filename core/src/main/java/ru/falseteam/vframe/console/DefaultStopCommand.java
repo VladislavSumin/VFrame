@@ -1,12 +1,12 @@
 package ru.falseteam.vframe.console;
 
 import org.apache.commons.cli.CommandLine;
+import ru.falseteam.vframe.VFrameRuntimeException;
 
 /**
  * Default command to stop server.
  *
  * @author Sumin Vladislav
- * @version 2.2
  */
 @SuppressWarnings("unused")
 public class DefaultStopCommand extends CommandAbstract {
@@ -23,7 +23,11 @@ public class DefaultStopCommand extends CommandAbstract {
 
     @Override
     public void exec(CommandLine commandLine) {
-        stop.stop();
+        try {
+            stop.stop();
+        } catch (Exception e) {
+            throw new VFrameRuntimeException("VFrame: Exception on stop command", e);
+        }
     }
 
     @Override
