@@ -12,6 +12,9 @@ import java.util.Map;
  * @author Sumin Vladislav
  */
 public class SubscriptionManager {
+
+    private String cacheDir;
+
     private static class SubscriptionSyncProtocol extends ProtocolAbstract {
         @Override
         public void exec(Map<String, Object> map, SocketWorker worker) {
@@ -58,16 +61,20 @@ public class SubscriptionManager {
         sw.addProtocol(new SubscriptionProtocol());
     }
 
-    public void subscribe(final String eventName, final String filename) {//TODO переделать нормально
+    public void subscribeWithCache(final String eventName) { // TODO что-то надо было пофиксить
         synchronized (data) {
             subscribe(eventName);
             Pair pair = data.get(eventName);
-            pair.filename = filename;
+            pair.filename = cacheDir + eventName + ".bin";
             if (pair.data == null) {
-                pair.data = BinaryUtils.loadFromBinaryFile(filename);
+                pair.data = BinaryUtils.loadFromBinaryFile(pair.filename);
                 Redrawer.redraw();//todo fix this
             }
         }
+    }
+
+    public void setCacheDir(final String cacheDir) {
+        this.cacheDir = cacheDir + "/";
     }
 
     public void subscribe(final String eventName) {
@@ -102,7 +109,6 @@ public class SubscriptionManager {
                 pair.subscriptionCount--;
             }
         }
-
     }
 
     public void dataUpdate(String eventName, Map<String, Object> newData) {

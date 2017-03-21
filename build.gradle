@@ -3,11 +3,16 @@ version '1.0.0'
 
 apply plugin: 'java'
 
-sourceCompatibility = 1.7
-
 subprojects {
     apply plugin: 'java'
 
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+}
+
+configure(subprojects.findAll {it.name != 'core'}) {
     task buildAll(type: Jar, dependsOn: 'packageSources') {
         manifest {
         }
@@ -18,21 +23,9 @@ subprojects {
     }
 
     task packageSources(type: Jar, dependsOn: 'classes') {
-        from sourceSets.main.allSource
+        from ([ project(':core').sourceSets.main.allSource, sourceSets.main.allSource])
         baseName = 'VFrame-' + project.name
         destinationDir = file("$rootDir")
         classifier = 'sources'
     }
-}
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.11'
-
-    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.7'
-    compile group: 'commons-cli', name: 'commons-cli', version: '1.3.1'
-    testCompile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.7'
 }

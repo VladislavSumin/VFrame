@@ -58,12 +58,22 @@ public class VFrame {
     }
 
     /**
+     * Printing msg with String.format to console with time tag.
+     *
+     * @param msg    - msg to print
+     * @param vararg - args from String.format
+     */
+    public static void print(String msg, Object... vararg) {
+        print(String.format(msg, vararg));
+    }
+
+    /**
      * Printing msg to console with time tag.
      *
      * @param msg - msg to print
      */
     public static void print(String msg) {
-        SimpleDateFormat format = new SimpleDateFormat("[HH:mm:ss.S] ");
+        SimpleDateFormat format = new SimpleDateFormat("[HH:mm:ss.SSS] ");
         System.out.println(format.format(new Date()) + msg);
     }
 
@@ -84,6 +94,18 @@ public class VFrame {
                 return;
             }
             timer.schedule(task, firstTime, period);
+        }
+    }
+
+    public static void addEveryOneDayPeriodicalTask(TimerTask task, long timeOfDay) {
+        synchronized (lock) {
+            if (!init) {
+                initError();
+                return;
+            }
+            long t = System.currentTimeMillis();
+            t -= t % (1000 * 60 * 60 * 24) + 3 * 60 * 60 * 1000; //Magic
+            timer.scheduleAtFixedRate(task, new Date(t + timeOfDay), 1000 * 60 * 60 * 24);
         }
     }
 
