@@ -1,7 +1,5 @@
 package ru.falseteam.vframe.console;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import ru.falseteam.vframe.VFrame;
 import ru.falseteam.vframe.VFrameRuntimeException;
 
@@ -10,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Listen System.in
@@ -19,7 +18,7 @@ import java.util.Map;
  */
 @SuppressWarnings({"unused"})
 public class ConsoleWorker {
-    private static Logger log = LogManager.getLogger();
+    private static Logger log = Logger.getLogger(ConsoleWorker.class.getName());
 
     private static final Map<String, CommandAbstract> commands = new HashMap<>();
 
@@ -59,8 +58,7 @@ public class ConsoleWorker {
                 } else
                     System.out.println("Unknown command");
             } catch (IOException e) {
-                log.fatal("VFrame: ConsoleWorker internal error");
-                throw new VFrameRuntimeException(e);
+                throw new VFrameRuntimeException("VFrame: ConsoleWorker internal error", e);
             }
         }
     };

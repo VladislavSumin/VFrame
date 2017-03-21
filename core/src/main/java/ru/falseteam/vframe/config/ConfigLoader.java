@@ -1,7 +1,5 @@
 package ru.falseteam.vframe.config;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import ru.falseteam.vframe.VFrameRuntimeException;
 
 import java.io.File;
@@ -13,6 +11,7 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 /**
  * Load field with annotation {@link LoadFromConfig}
@@ -24,7 +23,7 @@ import java.util.Properties;
  */
 @SuppressWarnings("unused")
 public class ConfigLoader {
-    private static Logger log = LogManager.getLogger();
+    private static Logger log = Logger.getLogger(ConfigLoader.class.getName());
 
     private static final String CONFIG_NAME = "%s.properties";
     private static final String CONFIG_FOLDER = "config/";
@@ -90,17 +89,15 @@ public class ConfigLoader {
             }
             // Unsupported type.
             else {
-                final String err = String.format("VFrame: Field %s in class %s have unsupported type %s",
+                final String err = String.format("VFrame: field %s in class %s have unsupported type %s",
                         field.getName(), clazz.getName(), fieldType.getName());
-                log.error(err);
                 throw new VFrameRuntimeException(err);
             }
         } catch (IllegalAccessException e) {
-            log.error("VFrame: ConfigLoader internal error", e);
-            throw new VFrameRuntimeException(e);
+            throw new VFrameRuntimeException("VFrame: ConfigLoader internal error", e);
         } catch (NumberFormatException e) {
-            log.error("VFrame: Value {} is not a type {}", propertyValue, fieldType.getName());
-            throw new VFrameRuntimeException(e);
+            String err = String.format("VFrame: Value %s is not a type %s", propertyValue, fieldType.getName());
+            throw new VFrameRuntimeException(err, e);
         }
     }
 
@@ -115,14 +112,11 @@ public class ConfigLoader {
             final String filename = String.format(CONFIG_FOLDER + CONFIG_NAME, name);
             final File file = new File(filename);
             if (!file.exists() && !file.createNewFile()) {
-                String err = "VFrame can not create file " + filename;
-                log.fatal(err);
-                throw new VFrameRuntimeException(err);
+                throw new VFrameRuntimeException("VFrame can not create file " + filename);
             }
             container.properties.load(new FileInputStream(file));
         } catch (IOException e) {
-            log.fatal("VFrame: ConfigLoader internal error", e);
-            throw new VFrameRuntimeException(e);
+            throw new VFrameRuntimeException("VFrame: ConfigLoader internal error", e);
         }
 
         preferencesMap.put(name, container);
@@ -136,8 +130,7 @@ public class ConfigLoader {
                 container.properties.store(new FileOutputStream(
                         String.format(CONFIG_FOLDER + CONFIG_NAME, name)), "");
             } catch (IOException e) {
-                log.error("VFrame: ConfigLoader can not save config file", e);
-                throw new VFrameRuntimeException(e);
+                throw new VFrameRuntimeException("VFrame: ConfigLoader can not save config file", e);
             }
         }
     }
@@ -145,9 +138,7 @@ public class ConfigLoader {
     private void createConfigFolder() {
         final File file = new File(CONFIG_FOLDER);
         if (!file.exists() && !file.mkdir()) {
-            final String err = "VFrame cannot create config folder.";
-            log.fatal(err);
-            throw new VFrameRuntimeException(err);
+            throw new VFrameRuntimeException("VFrame: ConfigLoader cannot create config folder");
         }
     }
 }
