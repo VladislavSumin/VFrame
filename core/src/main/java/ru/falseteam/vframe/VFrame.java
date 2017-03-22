@@ -1,9 +1,12 @@
 package ru.falseteam.vframe;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 /**
@@ -29,6 +32,15 @@ public class VFrame {
             if (init) {
                 throw new VFrameRuntimeException("VFrame already init");
             }
+
+            // Init logger
+            InputStream config = VFrame.class.getClassLoader().getResourceAsStream("logging.properties");
+            try {
+                LogManager.getLogManager().readConfiguration(config);
+            } catch (IOException e) {
+                e.printStackTrace(); //TODO fix this
+            }
+
             init = true;
             timer = new Timer("VFrame: main timer");
             log.info("VFrame init");
