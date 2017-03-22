@@ -9,18 +9,19 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Base abstract class to server connection.
  *
  * @author Sumin Vladislav
- * @version 3.9
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public abstract class ConnectionAbstract<T extends Enum<T>> {
     private static final Logger log = Logger.getLogger(ConnectionAbstract.class.getName());
 
+    // Container to internal VFrame protocols
     private static final Map<String, ProtocolAbstract> defaultProtocols = new HashMap<>();
 
     private final Socket socket;
@@ -34,6 +35,7 @@ public abstract class ConnectionAbstract<T extends Enum<T>> {
     long lastPing;
 
     static {
+        // Add internal VFrame protocols
         addDefaultProtocol(new Ping());
         addDefaultProtocol(new SubscriptionManager.SubscriptionProtocol());
     }
@@ -45,36 +47,29 @@ public abstract class ConnectionAbstract<T extends Enum<T>> {
     public ConnectionAbstract(final Socket socket, final SocketWorker<T> worker) {
         this.socket = socket;
         this.worker = worker;
+
         lastPing = System.currentTimeMillis();
         permission = worker.getPermissionManager().getDefaultPermission();
 
-        final ConnectionAbstract link = this;
+        final ConnectionAbstract link = this; //TODO пофиксить это
         new Thread("Connection with " + socket.getInetAddress().getHostAddress()) {
             @Override
             public void run() {
                 while (connected) {
                     try {
+                        //Create input && output streams
                         in = new ObjectInputStream(socket.getInputStream());
                         out = new ObjectOutputStream(socket.getOutputStream());
+
                         log.info(String.format("Client %s connected", socket.getInetAddress().getHostAddress()));
                         worker.addToClientsList(link);
                         onConnect();
-                        //noinspection InfiniteLoopStatement
-                        while (true) {
+
+                        while (connected) {
                             Container container = (Container) in.readObject();
-                            ProtocolAbstract protocol = defaultProtocols.get(container.protocol);
-                            if (protocol == null) protocol = worker.getPermissionManager()
-                                    .getProtocols(permission).get(container.protocol);
-                            if (protocol == null) {
-                                PermissionManager.DefaultProtocol defaultProtocol =
-                                        worker.getPermissionManager().getDefaultProtocol();
-                                if (defaultProtocol == null) {
-                                    //TODO fix log.error("VFrame: client used unknown protocol {}", container.protocol);
-                                } else
-                                    defaultProtocol.exec(container, link);
-                            } else
-                                protocol.exec(container.data, link);
+                            onDataReceive(container);
                         }
+
                     } catch (ClassNotFoundException e) {
                         disconnect(e.getMessage());
                     } catch (IOException ignore) {
@@ -85,7 +80,25 @@ public abstract class ConnectionAbstract<T extends Enum<T>> {
         }.start();
     }
 
-    protected void onConnect() {
+    private void onDataReceive(Container container) {
+        // Try to find on defaultProtocols
+        ProtocolAbstract protocol = defaultProtocols.get(container.protocol);
+        if (protocol == null)
+            // Try to find on other protocol
+            protocol = worker.getPermissionManager().getProtocols(permission).get(container.protocol);
+        if (protocol == null) {
+            PermissionManager.DefaultProtocol defaultProtocol =
+                    worker.getPermissionManager().getDefaultProtocol();
+            if (defaultProtocol == null)
+                log.log(Level.WARNING,
+                        String.format("VFrame: client used unknown protocol %s", container.protocol));
+            else
+                defaultProtocol.exec(container, this);
+        } else
+            protocol.exec(container.data, this);
+    }
+
+    protected void onConnect() { //TODO Подумать над этим
 
     }
 
@@ -101,8 +114,9 @@ public abstract class ConnectionAbstract<T extends Enum<T>> {
         synchronized (socket) {
             if (!connected) return;
             connected = false;
+            //TODO тут тоже посмотреть
             worker.removeFromClientsList(this);
-            //TODO SubscriptionManager.removeSubscriber(this);
+            worker.getSubscriptionManager().removeSubscriber(this);
             onDisconnect();
             try {
                 socket.close();
