@@ -25,9 +25,19 @@ public class VFrame {
     private static Timer timer;
 
     /**
-     * Initialize VFrame library.
+     * Initialize VFrame library
      */
     public static void init() {
+        init(false);
+        //TODO поравить этот костыль.
+    }
+
+    /**
+     * Initialize VFrame library.
+     * <p>
+     * Warning: Save log file not work on android
+     */
+    public static void init(boolean saveLogFile) {
         synchronized (lock) {
             if (init) {
                 throw new VFrameRuntimeException("VFrame already init");
@@ -35,10 +45,10 @@ public class VFrame {
 
             // Init logger
             InputStream config;
-            if (System.getProperty("os.name").equals("android"))
-                config = VFrame.class.getClassLoader().getResourceAsStream("logging_android.properties");
-            else
+            if (saveLogFile)
                 config = VFrame.class.getClassLoader().getResourceAsStream("logging.properties");
+            else
+                config = VFrame.class.getClassLoader().getResourceAsStream("logging_no_file_save.properties");
             try {
                 LogManager.getLogManager().readConfiguration(config);
             } catch (IOException e) {
