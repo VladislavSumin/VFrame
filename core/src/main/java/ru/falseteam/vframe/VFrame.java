@@ -34,7 +34,11 @@ public class VFrame {
             }
 
             // Init logger
-            InputStream config = VFrame.class.getClassLoader().getResourceAsStream("logging.properties");
+            InputStream config;
+            if (System.getProperty("os.name").equals("android"))
+                config = VFrame.class.getClassLoader().getResourceAsStream("logging_android.properties");
+            else
+                config = VFrame.class.getClassLoader().getResourceAsStream("logging.properties");
             try {
                 LogManager.getLogManager().readConfiguration(config);
             } catch (IOException e) {
