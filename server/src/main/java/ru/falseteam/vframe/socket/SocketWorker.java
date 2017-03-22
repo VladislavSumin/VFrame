@@ -1,7 +1,5 @@
 package ru.falseteam.vframe.socket;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import ru.falseteam.vframe.VFrame;
 import ru.falseteam.vframe.VFrameRuntimeException;
 
@@ -12,6 +10,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimerTask;
+import java.util.logging.Logger;
 
 /**
  * Listen socket and create connection class.
@@ -21,7 +20,7 @@ import java.util.TimerTask;
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class SocketWorker<T extends Enum<T>> {
-    private static final Logger log = LogManager.getLogger();
+    private static final Logger log = Logger.getLogger(SocketWorker.class.getName());
 
     public interface ConnectionFactory {
         ConnectionAbstract createNewConnection(Socket socket, SocketWorker parent);
@@ -64,8 +63,7 @@ public class SocketWorker<T extends Enum<T>> {
         try {
             this.socket = (SSLServerSocket) keystore.getSSLContext().getServerSocketFactory().createServerSocket(port);
         } catch (IOException e) {
-            log.fatal("VFrame can not open port {}", port);
-            throw new VFrameRuntimeException(e);
+            throw new VFrameRuntimeException(String.format("VFrame can not open port {}", port), e);
         }
     }
 
@@ -101,8 +99,7 @@ public class SocketWorker<T extends Enum<T>> {
         try {
             socket.close();
         } catch (IOException e) {
-            log.fatal("VFrame: Can not close port");
-            throw new VFrameRuntimeException(e);
+            throw new VFrameRuntimeException("VFrame: Can not close port", e);
         }
         VFrame.print("Port " + socket.getLocalPort() + " closed");
 

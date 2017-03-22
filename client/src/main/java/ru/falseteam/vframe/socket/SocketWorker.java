@@ -1,9 +1,8 @@
 package ru.falseteam.vframe.socket;
 
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import ru.falseteam.vframe.VFrame;
+import ru.falseteam.vframe.VFrameRuntimeException;
 
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -13,6 +12,8 @@ import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Base client socket worker class
@@ -23,7 +24,7 @@ import java.util.*;
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class SocketWorker<T extends Enum<T>> {
 
-    private static final Logger log = LogManager.getLogger();
+    private static final Logger log = Logger.getLogger(SocketWorker.class.getName());
 
     private final Object lock = new Object();
 
@@ -65,7 +66,8 @@ public class SocketWorker<T extends Enum<T>> {
                         Container container = (Container) in.readObject();
                         ProtocolAbstract protocol = protocols.get(container.protocol);
                         if (protocol == null) {
-                            log.error("VFrame: Server used unknown protocol {}", container.protocol);
+                            log.log(Level.WARNING,
+                                    String.format("VFrame: Server used unknown protocol %s", container.protocol));
                             continue;
                         }
                         protocol.exec(container.data, link);
@@ -97,10 +99,8 @@ public class SocketWorker<T extends Enum<T>> {
 
     public void start() {
         synchronized (lock) {
-            if (work) {
-                log.error("VFrame: SocketWorker already worked");
-                return;
-            }
+            if (work)
+                throw new VFrameRuntimeException("VFrame: SocketWorker already worked");
             work = true;
             new Thread(run, "Client socket worker thread").start();
 
@@ -118,10 +118,8 @@ public class SocketWorker<T extends Enum<T>> {
 
     public void stop() {
         synchronized (lock) {
-            if (!work) {
-                log.error("VFrame: SocketWorker already stopped");
-                return;
-            }
+            if (!work)
+                throw new VFrameRuntimeException("VFrame: SocketWorker already stopped");
             work = false;
             pingTask.cancel();
             pingTask = null;
