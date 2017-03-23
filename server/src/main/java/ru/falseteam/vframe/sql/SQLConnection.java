@@ -46,7 +46,7 @@ public class SQLConnection {
         } catch (Exception e) {
             throw new VFrameRuntimeException("VFrame: SQLConnection: Can not connected to database", e);
         }
-        VFrame.print("Database connected");
+        log.info("VFrame: Database connected");
     }
 
     public static void stop() {

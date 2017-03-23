@@ -42,7 +42,7 @@ public class VFKeystore {
             TrustManager[] trustManagers = tmf.getTrustManagers();
             sslContext.init(keyManagers, trustManagers, null);
 
-            VFrame.print("VFrame: keystore loaded");
+            log.info("VFrame: VFKeystore loaded");
 
         } catch (Exception e) {
             throw new VFrameRuntimeException("VFrame: Can not load keyStore", e);

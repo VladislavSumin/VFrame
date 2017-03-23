@@ -76,27 +76,27 @@ public class VFrame {
         }
     }
 
-    /**
-     * Printing msg with String.format to console with time tag.
-     *
-     * @param msg    - msg to print
-     * @param vararg - args from String.format
-     */
-    @Deprecated
-    public static void print(String msg, Object... vararg) {
-        print(String.format(msg, vararg));
-    }
-
-    /**
-     * Printing msg to console with time tag.
-     *
-     * @param msg - msg to print
-     */
-    @Deprecated
-    public static void print(String msg) {
-        SimpleDateFormat format = new SimpleDateFormat("[HH:mm:ss.SSS] ");
-        System.out.println(format.format(new Date()) + msg);
-    }
+//    /**
+//     * Printing msg with String.format to console with time tag.
+//     *
+//     * @param msg    - msg to print
+//     * @param vararg - args from String.format
+//     */
+//    @Deprecated
+//    public static void print(String msg, Object... vararg) {
+//        print(String.format(msg, vararg));
+//    }
+//
+//    /**
+//     * Printing msg to console with time tag.
+//     *
+//     * @param msg - msg to print
+//     */
+//    @Deprecated
+//    public static void print(String msg) {
+//        SimpleDateFormat format = new SimpleDateFormat("[HH:mm:ss.SSS] ");
+//        System.out.println(format.format(new Date()) + msg);
+//    }
 
     public static void addPeriodicalTimerTask(TimerTask task, long period) {
         synchronized (lock) {

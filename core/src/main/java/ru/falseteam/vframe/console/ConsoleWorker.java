@@ -2,6 +2,7 @@ package ru.falseteam.vframe.console;
 
 import ru.falseteam.vframe.VFrame;
 import ru.falseteam.vframe.VFrameRuntimeException;
+import sun.rmi.runtime.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -45,7 +46,7 @@ public class ConsoleWorker {
         @Override
         public void run() {
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-            VFrame.print("VFrame: ConsoleWorker initialized");
+            log.info("VFrame: ConsoleWorker initialized");
             //noinspection InfiniteLoopStatement
             while (true) try {
                 String[] data = reader.readLine().split(" ", 2);
