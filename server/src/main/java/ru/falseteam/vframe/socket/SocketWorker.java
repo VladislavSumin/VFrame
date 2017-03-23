@@ -16,21 +16,23 @@ import java.util.logging.Logger;
  * Listen socket and create connection class.
  *
  * @author Sumin Vladislav
- * @version 4.8
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class SocketWorker<T extends Enum<T>> {
+
     private static final Logger log = Logger.getLogger(SocketWorker.class.getName());
 
+    // interface to create new connection
     public interface ConnectionFactory {
         ConnectionAbstract createNewConnection(Socket socket, SocketWorker parent);
     }
 
     private final SSLServerSocket socket;
+
     private final List<ConnectionAbstract> connections = new LinkedList<>();
+
     private final PermissionManager<T> permissionManager;
     private final SubscriptionManager<T> subscriptionManager;
-    private final ConnectionFactory connectionFactory;
 
     private final TimerTask pingTask = new TimerTask() {
         @Override
@@ -50,7 +52,6 @@ public class SocketWorker<T extends Enum<T>> {
         }
     };
 
-
     public SocketWorker(
             final ConnectionFactory connectionFactory,
             final VFKeystore keystore,
@@ -59,22 +60,20 @@ public class SocketWorker<T extends Enum<T>> {
 
         this.permissionManager = permissionManager;
         this.subscriptionManager = new SubscriptionManager<>();
-        this.connectionFactory = connectionFactory;
+
+        //Create server socket
         try {
             this.socket = (SSLServerSocket) keystore.getSSLContext().getServerSocketFactory().createServerSocket(port);
         } catch (IOException e) {
-            throw new VFrameRuntimeException(String.format("VFrame can not open port {}", port), e);
+            throw new VFrameRuntimeException(String.format("VFrame can not open port %d", port), e);
         }
-    }
 
-    public void start() {
-        //TODO запретить старт стоп старт послеждовательность
         final SocketWorker link = this;
         //Run listen thread
-        new Thread("SocketWorker port " + socket.getLocalPort()) {
+        new Thread("VFrame: SocketWorker port " + socket.getLocalPort()) {
             @Override
             public void run() {
-                VFrame.print("VFrame: port " + socket.getLocalPort() + " open and listening");
+                log.info("VFrame: SocketWorker: Port " + socket.getLocalPort() + " open and listening");
                 while (true) {
                     try {
                         connectionFactory.createNewConnection(socket.accept(), link);
@@ -93,17 +92,19 @@ public class SocketWorker<T extends Enum<T>> {
      * Close all connection.
      */
     public void stop() {
+        // Cancel ping task
         pingTask.cancel();
 
         //Close socket
         try {
             socket.close();
         } catch (IOException e) {
-            throw new VFrameRuntimeException("VFrame: Can not close port", e);
+            throw new VFrameRuntimeException("VFrame: SocketWorker: Can not close port", e);
         }
-        VFrame.print("Port " + socket.getLocalPort() + " closed");
+        log.info("Port " + socket.getLocalPort() + " closed");
 
         //Close all connection
+        // TODO подумать над тем как лучше закрывать соединения
         synchronized (connections) {
             Iterator<ConnectionAbstract> iterator = connections.iterator();
             while (iterator.hasNext()) {
