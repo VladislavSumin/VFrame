@@ -28,6 +28,7 @@ public class SocketWorker<T extends Enum<T>> {
     }
 
     private final SSLServerSocket socket;
+    private final ConnectionFactory connectionFactory;
 
     private final List<ConnectionAbstract> connections = new LinkedList<>();
 
@@ -58,6 +59,7 @@ public class SocketWorker<T extends Enum<T>> {
             int port,
             PermissionManager<T> permissionManager) {
 
+        this.connectionFactory = connectionFactory;
         this.permissionManager = permissionManager;
         this.subscriptionManager = new SubscriptionManager<>();
 
@@ -68,6 +70,13 @@ public class SocketWorker<T extends Enum<T>> {
             throw new VFrameRuntimeException(String.format("VFrame can not open port %d", port), e);
         }
 
+
+    }
+
+    /**
+     * Start listen port
+     */
+    public void start() {
         final SocketWorker link = this;
         //Run listen thread
         new Thread("VFrame: SocketWorker port " + socket.getLocalPort()) {
