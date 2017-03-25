@@ -1,7 +1,8 @@
-package ru.falseteam.vframe.console;
+package ru.falseteam.vframe.console.commands;
 
 import org.apache.commons.cli.CommandLine;
 import ru.falseteam.vframe.VFrameRuntimeException;
+import ru.falseteam.vframe.console.CommandAbstract;
 
 /**
  * Default command to stop server.
@@ -9,7 +10,7 @@ import ru.falseteam.vframe.VFrameRuntimeException;
  * @author Sumin Vladislav
  */
 @SuppressWarnings("unused")
-public class DefaultStopCommand extends CommandAbstract {
+public class CCStop extends CommandAbstract {
     @SuppressWarnings("WeakerAccess")
     public interface Stoppable {
         void stop();
@@ -17,7 +18,7 @@ public class DefaultStopCommand extends CommandAbstract {
 
     private final Stoppable stop;
 
-    public DefaultStopCommand(Stoppable stop) {
+    public CCStop(Stoppable stop) {
         this.stop = stop;
     }
 
