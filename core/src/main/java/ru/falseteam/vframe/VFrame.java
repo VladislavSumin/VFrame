@@ -21,6 +21,7 @@ public class VFrame {
 
     private static final Object lock = new Object();
     private static boolean init = false;
+    private static long uptime;
 
     private static Timer timer;
 
@@ -55,6 +56,7 @@ public class VFrame {
                 e.printStackTrace(); //TODO fix this
             }
 
+            uptime = System.currentTimeMillis();
             init = true;
             timer = new Timer("VFrame: main timer");
             log.info("VFrame init");
@@ -124,5 +126,9 @@ public class VFrame {
     private static void initError() {
         if (!init)
             throw new VFrameRuntimeException("VFrame not init");
+    }
+
+    public static long getUptime() {
+        return uptime;
     }
 }
