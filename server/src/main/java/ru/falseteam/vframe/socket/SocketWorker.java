@@ -18,7 +18,7 @@ import java.util.logging.Logger;
  * @author Sumin Vladislav
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
-public class SocketWorker<T extends Enum<T>> {
+public class SocketWorker<PermissionEnum extends Enum<PermissionEnum>> {
 
     private static final Logger log = Logger.getLogger(SocketWorker.class.getName());
 
@@ -32,8 +32,8 @@ public class SocketWorker<T extends Enum<T>> {
 
     private final List<ConnectionAbstract> connections = new LinkedList<>();
 
-    private final PermissionManager<T> permissionManager;
-    private final SubscriptionManager<T> subscriptionManager;
+    private final PermissionManager<PermissionEnum> permissionManager;
+    private final SubscriptionManager<PermissionEnum> subscriptionManager;
 
     private final TimerTask pingTask = new TimerTask() {
         @Override
@@ -57,7 +57,7 @@ public class SocketWorker<T extends Enum<T>> {
             final ConnectionFactory connectionFactory,
             final VFKeystore keystore,
             int port,
-            PermissionManager<T> permissionManager) {
+            PermissionManager<PermissionEnum> permissionManager) {
 
         this.connectionFactory = connectionFactory;
         this.permissionManager = permissionManager;
@@ -144,15 +144,16 @@ public class SocketWorker<T extends Enum<T>> {
         }
     }
 
+    @Deprecated
     public List<ConnectionAbstract> getConnections() {
         return connections;
     }
 
-    public PermissionManager<T> getPermissionManager() {
+    public PermissionManager<PermissionEnum> getPermissionManager() {
         return permissionManager;
     }
 
-    public SubscriptionManager<T> getSubscriptionManager() {
+    public SubscriptionManager<PermissionEnum> getSubscriptionManager() {
         return subscriptionManager;
     }
 }
