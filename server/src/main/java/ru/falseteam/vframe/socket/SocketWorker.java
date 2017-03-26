@@ -132,13 +132,13 @@ public class SocketWorker<T extends Enum<T>> {
         }
     }
 
-    public void addToClientsList(ConnectionAbstract connection) {
+    void addToClientsList(ConnectionAbstract connection) {
         synchronized (connections) {
             connections.add(connection);
         }
     }
 
-    public void removeFromClientsList(ConnectionAbstract connection) {
+    void removeFromClientsList(ConnectionAbstract connection) {
         synchronized (connections) {
             connections.remove(connection);
         }
