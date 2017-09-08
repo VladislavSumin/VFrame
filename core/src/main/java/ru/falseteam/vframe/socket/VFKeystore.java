@@ -1,7 +1,5 @@
 package ru.falseteam.vframe.socket;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import ru.falseteam.vframe.VFrame;
 import ru.falseteam.vframe.VFrameRuntimeException;
 
@@ -10,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.security.KeyStore;
+import java.util.logging.Logger;
 
 /**
  * VFrame keystore container
@@ -19,7 +18,7 @@ import java.security.KeyStore;
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class VFKeystore {
-    private static final Logger log = LogManager.getLogger();
+    private static final Logger log = Logger.getLogger(VFKeystore.class.getName());
     private final SSLContext sslContext;
 
     public VFKeystore(InputStream path, String publicPassword, String privatePassword) {
@@ -43,11 +42,10 @@ public class VFKeystore {
             TrustManager[] trustManagers = tmf.getTrustManagers();
             sslContext.init(keyManagers, trustManagers, null);
 
-            VFrame.print("VFrame: keystore loaded");
+            log.info("VFrame: VFKeystore loaded");
 
         } catch (Exception e) {
-            log.fatal("VFrame: Can not load keyStore");
-            throw new VFrameRuntimeException(e);
+            throw new VFrameRuntimeException("VFrame: Can not load keyStore", e);
         }
     }
 

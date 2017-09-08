@@ -1,13 +1,12 @@
 package ru.falseteam.vframe.sql;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import ru.falseteam.vframe.VFrame;
 import ru.falseteam.vframe.VFrameRuntimeException;
 import ru.falseteam.vframe.config.ConfigLoader;
 import ru.falseteam.vframe.config.LoadFromConfig;
 
 import java.sql.*;
+import java.util.logging.Logger;
 
 /**
  * Create single connection to database.
@@ -19,11 +18,11 @@ import java.sql.*;
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class SQLConnection {
-    private static final Logger log = LogManager.getLogger();
+    private static final Logger log = Logger.getLogger(SQLConnection.class.getName());
 
     @SuppressWarnings("SpellCheckingInspection")
     @LoadFromConfig(filename = "database",
-            defaultValue = "jdbc:mysql://localhost:3306?useSSL=false?autoReconnect=true")
+            defaultValue = "jdbc:mysql://localhost:3306?useSSL=false&useUnicode=true&autoReconnect=true&characterEncoding=UTF-8")
     private static String url;
     @LoadFromConfig(filename = "database", defaultValue = "root")
     private static String username;
@@ -45,10 +44,9 @@ public class SQLConnection {
             connection.setCatalog(databaseName);
             statement = connection.createStatement();
         } catch (Exception e) {
-            log.fatal("Can not connected to database");
-            throw new VFrameRuntimeException(e);
+            throw new VFrameRuntimeException("VFrame: SQLConnection: Can not connected to database", e);
         }
-        VFrame.print("Database connected");
+        log.info("VFrame: Database connected");
     }
 
     public static void stop() {

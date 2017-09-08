@@ -1,43 +1,65 @@
 package ru.falseteam.vframe;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 /**
  * Main library class.
  * Must be init before use another library classes.
- * <p>
- * Главный класс библиотеки.
- * Метод init() должен быть вызван до начала работы с библиотекой.
  *
  * @author Sumin Vladislav
  */
 @SuppressWarnings("unused")
 public class VFrame {
-    private static final Logger log = LogManager.getLogger();
+    private static final Logger log = Logger.getLogger(VFrame.class.getName());
 
     private static final Object lock = new Object();
     private static boolean init = false;
+    private static long uptime;
 
     private static Timer timer;
 
     /**
-     * Initialize VFrame library.
+     * Initialize VFrame library
      */
     public static void init() {
+        init(false);
+        //TODO поравить этот костыль.
+    }
+
+    /**
+     * Initialize VFrame library.
+     * <p>
+     * Warning: Save log file not work on android
+     */
+    public static void init(boolean saveLogFile) {
         synchronized (lock) {
             if (init) {
-                log.error("VFrame already initialized");
-                return;
+                throw new VFrameRuntimeException("VFrame already init");
             }
+
+            // Init logger
+            InputStream config;
+            if (saveLogFile)
+                config = VFrame.class.getClassLoader().getResourceAsStream("logging.properties");
+            else
+                config = VFrame.class.getClassLoader().getResourceAsStream("logging_no_file_save.properties");
+            try {
+                LogManager.getLogManager().readConfiguration(config);
+            } catch (IOException e) {
+                e.printStackTrace(); //TODO fix this
+            }
+
+            uptime = System.currentTimeMillis();
             init = true;
-            timer = new Timer("VFrame main timer");
-            print("VFrame initialized");
+            timer = new Timer("VFrame: main timer");
+            log.info("VFrame init");
         }
     }
 
@@ -47,13 +69,12 @@ public class VFrame {
     public static void stop() {
         synchronized (lock) {
             if (!init) {
-                log.error("VFrame already not initialized");
-                return;
+                throw new VFrameRuntimeException("VFrame already not init");
             }
             init = false;
             timer.cancel();
             timer = null;
-            print("VFrame stopped");
+            log.info("VFrame stop");
         }
     }
 
@@ -63,6 +84,7 @@ public class VFrame {
      * @param msg    - msg to print
      * @param vararg - args from String.format
      */
+    @Deprecated
     public static void print(String msg, Object... vararg) {
         print(String.format(msg, vararg));
     }
@@ -72,6 +94,7 @@ public class VFrame {
      *
      * @param msg - msg to print
      */
+    @Deprecated
     public static void print(String msg) {
         SimpleDateFormat format = new SimpleDateFormat("[HH:mm:ss.SSS] ");
         System.out.println(format.format(new Date()) + msg);
@@ -79,30 +102,21 @@ public class VFrame {
 
     public static void addPeriodicalTimerTask(TimerTask task, long period) {
         synchronized (lock) {
-            if (!init) {
-                initError();
-                return;
-            }
+            initError();
             timer.schedule(task, 0, period);
         }
     }
 
     public static void addPeriodicalTimerTask(TimerTask task, Date firstTime, long period) {
         synchronized (lock) {
-            if (!init) {
-                initError();
-                return;
-            }
+            initError();
             timer.schedule(task, firstTime, period);
         }
     }
 
     public static void addEveryOneDayPeriodicalTask(TimerTask task, long timeOfDay) {
         synchronized (lock) {
-            if (!init) {
-                initError();
-                return;
-            }
+            initError();
             long t = System.currentTimeMillis();
             t -= t % (1000 * 60 * 60 * 24) + 3 * 60 * 60 * 1000; //Magic
             timer.scheduleAtFixedRate(task, new Date(t + timeOfDay), 1000 * 60 * 60 * 24);
@@ -110,8 +124,11 @@ public class VFrame {
     }
 
     private static void initError() {
-        final String error = "VFrame not init";
-        log.fatal(error);
-        throw new VFrameRuntimeException(error);
+        if (!init)
+            throw new VFrameRuntimeException("VFrame not init");
+    }
+
+    public static long getUptime() {
+        return uptime;
     }
 }
