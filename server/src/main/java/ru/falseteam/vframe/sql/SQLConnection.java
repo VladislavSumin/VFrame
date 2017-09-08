@@ -22,7 +22,7 @@ public class SQLConnection {
 
     @SuppressWarnings("SpellCheckingInspection")
     @LoadFromConfig(filename = "database",
-            defaultValue = "jdbc:mysql://localhost:3306?useSSL=false?autoReconnect=true")
+            defaultValue = "jdbc:mysql://localhost:3306?useSSL=false&useUnicode=true&autoReconnect=true&characterEncoding=UTF-8")
     private static String url;
     @LoadFromConfig(filename = "database", defaultValue = "root")
     private static String username;
