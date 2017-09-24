@@ -193,13 +193,25 @@ public class SocketWorker<T extends Enum<T>> {
         }
     }
 
-    public void addOnConnectionChangeStateListener(OnChangePermissionListener<T> listener) {
+    /**
+     * Добавляет слушателя на изменение текущих привелегий.
+     *
+     * @param listener  - слушатель
+     * @param invokeNow - если true то слушатель сработает сразу после добавления
+     */
+    public void addOnPermissionChangeStateListener(OnChangePermissionListener<T> listener, boolean invokeNow) {
         synchronized (listeners) {
             listeners.add(listener);
+            if (invokeNow) listener.onChangePermission(currentPermission);
         }
     }
 
-    public void removeOnConnectionChangeStateListener(OnChangePermissionListener<T> listener) {
+    /**
+     * Удаляет слушаетля на изменение текущих привелегий.
+     *
+     * @param listener - слушатель
+     */
+    public void removeOnPermissionChangeStateListener(OnChangePermissionListener<T> listener) {
         synchronized (listeners) {
             listeners.remove(listener);
         }
@@ -228,6 +240,5 @@ public class SocketWorker<T extends Enum<T>> {
 
     public T getCurrentPermission() {
         return currentPermission;
-        //TODO добавить слушателя смены пермишена.
     }
 }
